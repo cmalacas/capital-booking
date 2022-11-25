@@ -1,40 +1,22 @@
 import './bootstrap';
+import '../css/app.css';
 
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
+import { createInertiaApp } from '@inertiajs/inertia-react';
+import { InertiaProgress } from '@inertiajs/progress';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
-import { unregister } from './registerServiceWorker';
+const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
-import { HashRouter } from 'react-router-dom';
+createInertiaApp({
+    title: (title) => `${title} - ${appName}`,
+    resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob('./Pages/**/*.jsx')),
+    setup({ el, App, props }) {
+        const root = createRoot(el);
 
-import configureStore from './config/configureStore';
+        root.render(<App {...props} />);
+    },
+});
 
-import { Provider } from 'react-redux';
-
-import App from './components/App';
-
-const store = configureStore();
-
-const appElement = document.getElementById('app');
-
-const root = ReactDOM.createRoot(appElement);
-
-const renderApp = Component => {
-  root.render(
-    <Provider store={store}>
-      <HashRouter>
-        <Component />
-      </HashRouter>
-    </Provider>
-  );  
-};
-
-renderApp(App);
-
-/* if (module.hot) {
-  module.hot.accept('./components/App', () => {
-    const NextApp = require('./components/App').default;
-    renderApp(NextApp);
-  });
-}
-unregister(); */
+InertiaProgress.init({ color: '#4B5563' });
