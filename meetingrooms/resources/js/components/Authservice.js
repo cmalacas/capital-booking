@@ -50,6 +50,22 @@ class Authservice {
 
     }
 
+    async doLogin(data) {
+
+        try {
+
+            const response = await Axios.post('/login', data)
+
+            return response.data
+
+        } catch ( error ) {
+
+            return false;
+
+        }
+
+    }
+
 }
 
 export default new Authservice();

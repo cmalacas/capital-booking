@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
+use Illuminate\Http\Request;
+
+use Auth;
+
 class LoginController extends Controller
 {
     /*
@@ -40,5 +44,25 @@ class LoginController extends Controller
 
     public function showLoginForm() {
         return view('welcome');
+    }
+
+    public function login(Request $request) {
+
+        $email = $request->get('email');
+
+        $password = $request->get('password');
+
+        $loginData = ['email' => $email, 'password' => $password];
+
+        if (Auth::attempt($loginData)) {
+
+            return response()->json(['success' => 1, 'redirect' => '/dashboard']);
+
+        } else {
+
+            return response()->json(['success' => 0, 'redirect' => '/login']);
+
+        }
+
     }
 }

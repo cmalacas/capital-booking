@@ -52,11 +52,13 @@ export default class Navigation extends Component {
                             { user.id > 0 ?
 
                             <ul className="navbar-nav ml-auto">
-                                <a id="navbarDropdown" className="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                <a id="navbarDropdown" className="nav-link dropdown-toggle" href="#" 
+                                role="button" 
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     { user.firstname } { user.lastname }
                                 </a>
 
-                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                <div className="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                                     <a className="dropdown-item" 
                                        onClick={this.doLogout}>
                                         Logout

@@ -51,6 +51,15 @@ export default class Login extends Component {
             Authservice.doLogin(data)
             .then(response => {
 
+                if (response.success === 1) {
+
+                    location = response.redirect;
+
+                } else {
+
+                    
+
+                }
 
             })
 
@@ -92,7 +101,7 @@ export default class Login extends Component {
                                     name="email" 
                                     value={this.state.email} 
                                     required={true} 
-                                    autocomplete="email" 
+                                    autoComplete="email" 
                                     autoFocus={true} 
                                     onChange={this.change}
                                 />
@@ -110,14 +119,14 @@ export default class Login extends Component {
                                 Password
                             </label>
 
-                            <div class="col-md-6">
+                            <div className="col-md-6">
                                 <input 
                                     id="password" 
                                     type="password" 
                                     className={`form-control ${this.state.errorPassword ? 'is-invalid' : ''}`} 
                                     name="password" 
                                     required={true} 
-                                    autocomplete="current-password"
+                                    autoComplete="current-password"
                                     onChange={this.change}
                                 />
 
@@ -129,14 +138,14 @@ export default class Login extends Component {
                             </div>
                         </div>                        
 
-                        <div class="form-group row mb-0">
+                        <div className="form-group row mb-0">
                             <div className="col-md-8 offset-md-4">
                                 <button type="button" onClick={this.login} className="btn btn-primary">
                                     Login
                                 </button>
 
                                
-                                <a class="btn btn-link" href="">
+                                <a className="btn btn-link" href="">
                                     Forgot Your Password?
                                 </a>
                                
