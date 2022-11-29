@@ -45,11 +45,9 @@ export default class Navigation extends Component {
                             className="collapse navbar-collapse" 
                             id="navbarSupportedContent"
                         >
-                            <ul className="navbar-nav mr-auto">
-                                
-                            </ul>
+                            
 
-                            { user.id > 0 ?
+                            { user && user.id > 0 ?
 
                             <ul className="navbar-nav ml-auto">
                                 <a id="navbarDropdown" className="nav-link dropdown-toggle" href="#" 
@@ -67,7 +65,21 @@ export default class Navigation extends Component {
                                 
                             </ul>
 
-                            : '' }
+                            : 
+                                
+                            <ul className="navbar-nav mr-auto">
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/login">Login</a>
+                                </li>
+                            
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/register">Register</a>
+                                </li>
+                                
+                            </ul>
+                                
+                            }
                         </div>
                     </div>
                 </nav>

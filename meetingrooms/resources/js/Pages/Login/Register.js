@@ -108,7 +108,9 @@ export default class Register extends Component {
 
             <Fragment>
 
-                <Navigation />
+                <Navigation 
+                    user={false}
+                />
 
                 <div className="row justify-content-center">
                     <div className="col-md-8">
