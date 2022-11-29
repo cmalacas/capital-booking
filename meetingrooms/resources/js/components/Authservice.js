@@ -12,7 +12,9 @@ class Authservice {
 
         } catch ( error ) {
 
-            return false;
+            console.log('error', error.response);
+
+            return error.response.data;
 
         }
 
@@ -60,7 +62,7 @@ class Authservice {
 
         } catch ( error ) {
 
-            return false;
+            return response.error;
 
         }
 

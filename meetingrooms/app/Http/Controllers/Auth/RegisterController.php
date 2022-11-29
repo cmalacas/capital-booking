@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+use Illuminate\Http\Request;
+
 class RegisterController extends Controller
 {
     /*
@@ -71,5 +73,46 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+    }
+
+    public function register(Request $request) {
+
+        $data = [
+            'firstname' => $request->get('firstname'),
+            'lastname' => $request->get('lastname'),
+            'email' => $request->get('email'),
+            'password' => $request->get('password'),
+            'password_confirmation' => $request->get('password_confirmation')
+        ];
+
+        $valid = $request->validate(
+                    [
+                        'firstname' => ['required', 'string', 'max:255'],
+                        'lastname' => ['required', 'string', 'max:255'],
+                        'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+                        'password' => ['required', 'string', 'min:8', 'confirmed'],
+                    ]);
+
+        if ($valid) {
+
+            $user = User::create([
+                        'firstname' => $data['firstname'],
+                        'lastname' => $data['lastname'],
+                        'email' => $data['email'],
+                        'password' => Hash::make($data['password']),
+            ]);
+
+            if ($user) {
+
+                return response()->json(['success' => 1]);
+
+            } 
+
+        } else {
+
+            return response()->json(['success' => 0]);
+
+        }
+
     }
 }

@@ -61,7 +61,7 @@ export default class Dashboard extends Component {
                 />
 
                 <div className="container">
-                    <div className="row justify-content-center">
+                    <div className="row justify-content-center mr-0 ml-0">
                         <div className="col-md-12 pt-4">
                         <Calendar
                             localizer={localizer}

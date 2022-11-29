@@ -85,8 +85,8 @@ export default class Login extends Component {
 
                     <Navigation user={false} />
                 
-                    <div className="row justify-content-center">
-                        <div className="col-md-12 pt-4">
+                    <div className="row justify-content-center mr-0 ml-0">
+                        <div className="col-md-6 pt-4">
 
                             <div className="form-group row">
                                 <label className="col-md-4 col-form-label text-md-right">

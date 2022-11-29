@@ -2,6 +2,9 @@ import React, {Component, Fragment} from 'react';
 import Navigation from '../../components/layouts/navigation';
 
 import Authservice from '../../components/Authservice';
+
+import {ToastContainer, toast} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 export default class Register extends Component {
 
     constructor(props) {
@@ -86,7 +89,13 @@ export default class Register extends Component {
             Authservice.register(data)
             .then(response => {
 
-                if (response.success) {
+                if (response.errors) {
+
+                    toast.error('The email has already been taken', {
+                        theme: 'colored'
+                    })
+
+                } else if (response.success) {
 
                     location = '/dashboard';
 
@@ -112,8 +121,8 @@ export default class Register extends Component {
                     user={false}
                 />
 
-                <div className="row justify-content-center">
-                    <div className="col-md-8">
+                <div className="row justify-content-center ml-0 mr-0">
+                    <div className="col-md-6">
                         <div className="card mt-4">
                             <div className="card-header">Register</div>
 
@@ -240,6 +249,8 @@ export default class Register extends Component {
                         </div>
                     </div>
                 </div>
+
+                <ToastContainer />
 
             </Fragment>
 

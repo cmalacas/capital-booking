@@ -67,14 +67,14 @@ export default class Navigation extends Component {
 
                             : 
                                 
-                            <ul className="navbar-nav mr-auto">
+                            <ul className="navbar-nav ml-auto">
 
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/login">Login</a>
+                                <li className="nav-item">
+                                    <a className="nav-link" href="/login">Login</a>
                                 </li>
                             
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/register">Register</a>
+                                <li className="nav-item">
+                                    <a className="nav-link" href="/register">Register</a>
                                 </li>
                                 
                             </ul>
