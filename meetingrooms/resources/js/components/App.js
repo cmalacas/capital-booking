@@ -21,6 +21,7 @@ export default class App extends Component {
             <Router>
                 <Routes>
                         <Route path="/" exact element={<Dashboard />} />
+                        <Route path="/dashboard" exact element={<Dashboard />} />
                         <Route path="/register" exact element={<Register />} />
                         <Route path="/login" exact element={<Login />} />
                 </Routes>

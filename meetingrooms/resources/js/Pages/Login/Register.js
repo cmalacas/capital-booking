@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from 'react';
 import Navigation from '../../components/layouts/navigation';
 
-
+import Authservice from '../../components/Authservice';
 export default class Register extends Component {
 
     constructor(props) {
@@ -79,8 +79,20 @@ export default class Register extends Component {
 
         if (valid) {
 
-            
+            const password_confirmation = confirmPassword;
 
+            const data = { firstname, lastname, email, password, password_confirmation }
+
+            Authservice.register(data)
+            .then(response => {
+
+                if (response.success) {
+
+                    location = '/dashboard';
+
+                }
+
+            })
 
         } else {
 
