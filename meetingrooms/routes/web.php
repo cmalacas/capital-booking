@@ -42,6 +42,7 @@ Route::group(['middleware' => 'auth:web'], function() {
         Route::post('/save', 'MeetingRoomController@save');
         Route::post('/update', 'MeetingRoomController@update');
         Route::post('/delete', 'MeetingRoomController@delete');
+        Route::post('/update-status', 'MeetingRoomController@updateStatus');
 
     });
 

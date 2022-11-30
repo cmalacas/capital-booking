@@ -29,6 +29,39 @@ export default class MeetingRooms extends Component {
         this.save = this.save.bind(this);
         this.getData = this.getData.bind(this);
         this.update = this.update.bind(this);
+        this.updateStatus = this.updateStatus.bind(this);
+        this.delete = this.delete.bind(this);
+    }
+
+    delete(id) {
+
+        Authservice.post('/meetingrooms/delete', {id})
+        .then(response => {
+
+            if (response.meetingrooms) {
+
+                this.setState({meetingrooms: response.meetingrooms});
+
+            }
+
+        })
+
+    }
+
+    updateStatus(data) {
+
+        Authservice.post('/meetingrooms/update-status', {id: data.id})
+        .then(response => {
+
+            if (response.meetingrooms) {
+
+                this.setState({meetingrooms: response.meetingrooms});
+
+            }
+
+        })        
+
+
     }
 
     update(data) {
@@ -136,7 +169,7 @@ export default class MeetingRooms extends Component {
 
         const data = this.state.meetingrooms.map( m => {
 
-            m._status = m.status === 1  ? <span className="text-success">Active <FontAwesomeIcon style={ { cursor: 'pointer' } } onClick={ () => this.props.updateStatus( c ) } icon={faCheckCircle} data-tip="Deactivate this account" /></span> : <span className="text-danger">Inactive <FontAwesomeIcon data-tip="Activate this account" style={ { cursor: 'pointer'} } onClick={ () => this.props.updateStatus(c) } icon={faCheckCircle} /></span>
+            m._status = m.status === 1  ? <span className="text-success">Active <FontAwesomeIcon style={ { cursor: 'pointer' } } onClick={ () => this.updateStatus( m ) } icon={faCheckCircle} data-tip="Deactivate this meeting room" /></span> : <span className="text-danger">Inactive <FontAwesomeIcon data-tip="Activate this meeting room" style={ { cursor: 'pointer'} } onClick={ () => this.updateStatus(m) } icon={faCheckCircle} /></span>
 
             m.actions = <Fragment>
                             <Edit
@@ -145,6 +178,7 @@ export default class MeetingRooms extends Component {
                             />
                             <Button 
                                 color="danger"
+                                onClick={() => this.delete(m.id)}
                             >
                                 <FontAwesomeIcon icon={faTrash} />
                             </Button>

@@ -10,7 +10,7 @@ class MeetingRoomController extends Controller
 {
     public function get() {
 
-        $meetingrooms = MeetingRoom::get();
+        $meetingrooms = MeetingRoom::where('deleted', '=', 0)->get();
 
         return response()->json(['meetingrooms' => $meetingrooms], 200, [], JSON_NUMERIC_CHECK);
 
@@ -46,6 +46,32 @@ class MeetingRoomController extends Controller
         $room->amount_8 = $request->get('amount_8');
 
         $room->status = $request->get('status');
+
+        $room->save();
+
+        return $this->get();
+
+
+    }
+
+    public function updateStatus(Request $request) {
+
+        $room = MeetingRoom::find($request->get('id'));
+
+        $room->status = $room->status == 1 ? 0 : 1;
+
+        $room->save();
+
+        return $this->get();
+
+
+    }
+
+    public function delete(Request $request) {
+
+        $room = MeetingRoom::find($request->get('id'));
+
+        $room->status = $room->deleted = 1;
 
         $room->save();
 
