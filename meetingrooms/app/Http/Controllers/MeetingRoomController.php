@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\MeetingRoom;
+# use App\MeetingRoom;
 
 class MeetingRoomController extends Controller
 {
     public function get() {
 
-        $meetingrooms = MeetingRoom::where('deleted', '=', 0)->get();
+        $meetingrooms = \App\MeetingRoom::where('deleted', '=', 0)->get();
 
         return response()->json(['meetingrooms' => $meetingrooms], 200, [], JSON_NUMERIC_CHECK);
 
@@ -18,7 +18,7 @@ class MeetingRoomController extends Controller
 
     public function save(Request $request) {
 
-        $room = new MeetingRoom;
+        $room = new \App\MeetingRoom;
 
         $room->name = $request->get('name');
         $room->amount_1 = $request->get('amount_1');
@@ -37,7 +37,7 @@ class MeetingRoomController extends Controller
 
     public function update(Request $request) {
 
-        $room = MeetingRoom::find($request->get('id'));
+        $room = \App\MeetingRoom::find($request->get('id'));
 
         $room->name = $request->get('name');
         $room->amount_1 = $request->get('amount_1');
@@ -56,7 +56,7 @@ class MeetingRoomController extends Controller
 
     public function updateStatus(Request $request) {
 
-        $room = MeetingRoom::find($request->get('id'));
+        $room = \App\MeetingRoom::find($request->get('id'));
 
         $room->status = $room->status == 1 ? 0 : 1;
 
@@ -69,7 +69,7 @@ class MeetingRoomController extends Controller
 
     public function delete(Request $request) {
 
-        $room = MeetingRoom::find($request->get('id'));
+        $room = \App\MeetingRoom::find($request->get('id'));
 
         $room->status = $room->deleted = 1;
 
