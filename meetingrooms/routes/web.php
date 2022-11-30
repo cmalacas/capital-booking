@@ -24,8 +24,26 @@ Route::group(['middleware' => 'auth:web'], function() {
     Route::get('/dashboard', function () {
         return view('welcome');
     });
+
+    Route::get('/meetingrooms', function () {
+        return view('welcome');
+    });
+
+    Route::get('/bookings', function () {
+        return view('welcome');
+    });
     
     Route::post('/get-user-data', 'UserController@get');
+
+
+    Route::prefix('/meetingrooms')->group(function() {
+
+        Route::post('/get', 'MeetingRoomController@get');
+        Route::post('/save', 'MeetingRoomController@save');
+        Route::post('/update', 'MeetingRoomController@update');
+        Route::post('/delete', 'MeetingRoomController@delete');
+
+    });
 
 });
 

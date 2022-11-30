@@ -49,21 +49,48 @@ export default class Navigation extends Component {
 
                             { user && user.id > 0 ?
 
-                            <ul className="navbar-nav ml-auto">
-                                <a id="navbarDropdown" className="nav-link dropdown-toggle" href="#" 
-                                role="button" 
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    { user.firstname } { user.lastname }
-                                </a>
+                            <Fragment>
 
-                                <div className="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                    <a className="dropdown-item" 
-                                       onClick={this.doLogout}>
-                                        Logout
+                                <ul className="navbar-nav ml-auto">
+                                    <a id="navbarDropdown" className="nav-link dropdown-toggle" href="#" 
+                                    role="button" 
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        { user.firstname } { user.lastname }
                                     </a>
-                                </div>
-                                
-                            </ul>
+
+                                    <div className="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                        {
+                                            user.type === 1 ?
+
+                                                <Fragment>
+                                                    <a 
+                                                        className="nav-link" 
+                                                        href="/meetingrooms"
+                                                    >
+                                                        Meeting Rooms
+                                                    </a>
+
+                                                    <a 
+                                                        className="nav-link" 
+                                                        href="/bookings"
+                                                    >
+                                                        Bookings
+                                                    </a>
+                                                </Fragment>
+
+                                            : '' 
+                                        }
+                                        <a 
+                                            className="nav-link" 
+                                            onClick={this.doLogout}
+                                        >
+                                            Logout
+                                        </a>
+                                    </div>
+                                    
+                                </ul>
+
+                            </Fragment>
 
                             : 
                                 

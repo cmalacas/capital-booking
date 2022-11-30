@@ -68,6 +68,22 @@ class Authservice {
 
     }
 
+    async post(url, data) {
+
+        try {
+
+            const response = await Axios.post(url, data)
+
+            return response.data
+
+        } catch ( error ) {
+
+            return response.error;
+
+        }
+
+    }
+
 }
 
 export default new Authservice();
