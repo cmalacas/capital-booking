@@ -46,6 +46,16 @@ Route::group(['middleware' => 'auth:web'], function() {
 
     });
 
+    Route::prefix('/bookings')->group(function() {
+
+        Route::post('/get', 'BookingController@get');
+        Route::post('/save', 'BookingController@save');
+        Route::post('/update', 'BookingController@update');
+        Route::post('/delete', 'BookingController@delete');
+        Route::post('/update-status', 'BookingController@updateStatus');
+
+    });
+
 });
 
 

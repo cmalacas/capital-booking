@@ -21,7 +21,7 @@ export default class Bookings extends Component {
         this.state = {
 
             user: {id: 0 },
-            meetingrooms: []
+            bookings: []
 
         }
 
@@ -97,12 +97,12 @@ export default class Bookings extends Component {
 
     getData() {
 
-        Authservice.post('/meetingrooms/get', false)
+        Authservice.post('/bookings/get', false)
         .then(response => {
 
-            if (response.meetingrooms) {
+            if (response.bookings) {
 
-                this.setState({meetingrooms: response.meetingrooms});
+                this.setState({bookings: response.bookings});
 
             }
 
@@ -138,28 +138,36 @@ export default class Bookings extends Component {
 
         const columns = [
                     {
-                        dataField: 'name',
-                        text: 'Name'
+                        dataField: 'index',
+                        text: 'SL'
                     },
                     {
-                        dataField: 'amount_1',
-                        text: '1 Hr'
+                        dataField: 'booking_number',
+                        text: 'Booking Number'
                     },
                     {
-                        dataField: 'amount_2',
-                        text: '2 Hrs'
+                        dataField: 'meeting_room_name',
+                        text: 'Meeting Room Name'
                     },
                     {
-                        dataField: 'amount_4',
-                        text: '4 Hrs'
+                        dataField: 'client_name',
+                        text: 'Client Name'
                     },
                     {
-                        dataField: 'amount_8',
-                        text: '8 Hrs'
+                        dataField: 'booking_date',
+                        text: 'Booking Date'
                     },
                     {
-                        dataField: '_status',
-                        text: 'Status'
+                        dataField: 'created_formattted',
+                        text: 'Created'
+                    },
+                    {
+                        dataField: 'payment_status_text',
+                        text: 'Payment Status'
+                    },
+                    {
+                        dataField: 'expired_status_text',
+                        text: 'Expired Status'
                     },
                     {
                         dataField: 'actions',
@@ -167,7 +175,7 @@ export default class Bookings extends Component {
                     }
                 ];
 
-        const data = this.state.meetingrooms.map( m => {
+        const data = this.state.bookings.map( m => {
 
             m._status = m.status === 1  ? <span className="text-success">Active <FontAwesomeIcon style={ { cursor: 'pointer' } } onClick={ () => this.updateStatus( m ) } icon={faCheckCircle} data-tip="Deactivate this meeting room" /></span> : <span className="text-danger">Inactive <FontAwesomeIcon data-tip="Activate this meeting room" style={ { cursor: 'pointer'} } onClick={ () => this.updateStatus(m) } icon={faCheckCircle} /></span>
 
@@ -196,7 +204,7 @@ export default class Bookings extends Component {
                     user={user}
                 />
 
-                <div className="container">
+                <div style={{maxWidth:'100%'}} className="container">
                     <div className="row justify-content-center mr-0 ml-0">
                         <div className="col-md-12 pt-4">
 
@@ -374,107 +382,103 @@ class Add extends Component {
                     </Col>    
                 </Row>
                 
-                <Modal isOpen={this.state.open} toggle={this.close}>
+                <Modal isOpen={this.state.open} toggle={this.close} className="mw-100 w-75">
                     <ModalHeader>
-                        Add Meeting Room
+                        Add Booking
                     </ModalHeader>
                     <ModalBody>
-                        <FormGroup>
-                            <Label>Name</Label>
-                            <Input 
-                                type="text" 
-                                name="name"
-                                className={`${this.state.errorName ? 'is-invalid' : ''}`}
-                                value={this.state.name}
-                                onChange={this.change}
-                            />
-                            { this.state.errorName ? 
-                                <span className="d-block invalid-feedback" role="alert">
-                                    <strong>this is required</strong>
-                                </span>
-                            : '' }
-                        </FormGroup>
-
+                        <Row>
+                            <Col md={6}>
                         <FormGroup row>
                             <Col md={6}>
-                                <Label>Amount For 1 Hr</Label>
+                                <Label>Client Name</Label>
                                 <Input 
-                                    type="number" 
-                                    name="amount_1"
-                                    className={`${this.state.errorAmount1 ? 'is-invalid' : ''}`}
-                                    value={this.state.amount_1}
+                                    type="text" 
+                                    name="name"
+                                    placeholder="Search Client"
                                     onChange={this.change}
                                 />
-                                { this.state.errorAmount1 ? 
-                                <span className="d-block invalid-feedback" role="alert">
-                                    <strong>this is required</strong>
-                                </span>
-                            : '' }
                             </Col>
-
                             <Col md={6}>
-                                <Label>Amount For 2 Hrs</Label>
-                                <Input 
-                                    type="number" 
-                                    name="amount_2"
-                                    value={this.state.amount_2}
-                                    onChange={this.change}
-                                    className={`${this.state.errorAmount2 ? 'is-invalid' : ''}`}
+                                <Label>&nbsp;</Label>
+                                <Input type="text" 
+                                    value={this.state.client_name}
+                                    placeholder="Client Name"
+                                    name="client_name"
                                 />
-                                { this.state.errorAmount2 ? 
-                                <span className="d-block invalid-feedback" role="alert">
-                                    <strong>this is required</strong>
-                                </span>
-                            : '' }
                             </Col>
                         </FormGroup>
 
                         <FormGroup row>
                             <Col md={6}>
-                                <Label>Amount For 4 Hrs</Label>
+                                <Label>Meeting Room</Label>
                                 <Input 
-                                    type="number" 
-                                    name="amount_4"
-                                    className={`${this.state.errorAmount4 ? 'is-invalid' : ''}`}
-                                    value={this.state.amount_4}
+                                    type="select" 
+                                    name="meeting_room_id"
+                                    className="form-control"
+                                    value={this.state.meeting_room_id}
                                     onChange={this.change}
-                                />
-                                { this.state.errorAmount4 ? 
-                                <span className="d-block invalid-feedback" role="alert">
-                                    <strong>this is required</strong>
-                                </span>
-                            : '' }
+                                >
+                                    <option value="0">Select meeting room</option>
+                                </Input>
+                                
                             </Col>
 
                             <Col md={6}>
-                                <Label>Amount For 8 Hrs</Label>
+                                <Label>Booking Date</Label>
                                 <Input 
-                                    type="number" 
-                                    name="amount_8"
-                                    value={this.state.amount_8}
+                                    type="date" 
+                                    name="booking_date"
+                                    value={this.state.booking_date}
                                     onChange={this.change}
-                                    className={`${this.state.errorAmount8 ? 'is-invalid' : ''}`}
+                                    
                                 />
-                                { this.state.errorAmount8 ? 
-                                <span className="d-block invalid-feedback" role="alert">
-                                    <strong>this is required</strong>
-                                </span>
-                            : '' }
+                            </Col>
+                        </FormGroup>
+
+                        <FormGroup row>
+                            <Col md={6}>
+                                <Label>From Time</Label>
+                                <Input 
+                                    type="time" 
+                                    name="from_time"
+                                    value={this.state.from_time}
+                                    onChange={this.change}
+                                />
+                            </Col>
+
+                            <Col md={6}>
+                                <Label>Duration</Label>
+                                <Input 
+                                    type="select" 
+                                    name="duration"
+                                    className="form-control"
+                                    value={this.state.duration}
+                                    onChange={this.change}
+                                >
+                                    <option value="0">Select duration</option>
+                                    <option value="1">1 Hr</option>
+                                    <option value="2">2 Hrs</option>
+                                    <option value="4">4 Hrs</option>
+                                    <option value="8">8 Hrs</option>
+                                </Input>
                             </Col>
                         </FormGroup>
 
                         <FormGroup>
                             <Label>
-                                <Input 
-                                    type="checkbox"
-                                    className="ml-0 mr-0 position-relative"
-                                    checked={this.state.status === 1}
-                                    onChange={ () => this.setState({
-                                        status: this.state.status === 1 ? 0 : 1
-                                    }) }
-                                /> Status
+                                Description
                             </Label>
+                            <Input
+                                type="textarea"
+                                name="description"
+                                value={this.state.description}
+                                placeholder="Description" 
+                                onChange={this.change}
+                            />
                         </FormGroup>
+                            </Col>
+                        </Row>
                     </ModalBody>
                     <ModalFooter>
                         <Button onClick={this.save} color="success"><FontAwesomeIcon icon={faSave} /> Save</Button>
