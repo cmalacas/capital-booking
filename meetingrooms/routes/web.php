@@ -56,6 +56,12 @@ Route::group(['middleware' => 'auth:web'], function() {
 
     });
 
+    Route::prefix('/clients')->group(function() {
+
+        Route::post('/lookup', 'UserController@lookup');        
+
+    });
+
 });
 
 

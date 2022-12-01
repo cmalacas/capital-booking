@@ -21,7 +21,8 @@ export default class Bookings extends Component {
         this.state = {
 
             user: {id: 0 },
-            bookings: []
+            bookings: [],
+            meetingrooms: []
 
         }
 
@@ -82,12 +83,12 @@ export default class Bookings extends Component {
 
     save(data) {
 
-        Authservice.post('/meetingrooms/save', data)
+        Authservice.post('/bookings/save', data)
         .then(response => {
 
-            if (response.meetingrooms) {
+            if (response.bookings) {
 
-                this.setState({meetingrooms: response.meetingrooms});
+                this.setState({bookings: response.bookings});
 
             }
 
@@ -102,7 +103,10 @@ export default class Bookings extends Component {
 
             if (response.bookings) {
 
-                this.setState({bookings: response.bookings});
+                this.setState({
+                    bookings: response.bookings,
+                    meetingrooms: response.meetingrooms
+                });
 
             }
 
@@ -158,7 +162,7 @@ export default class Bookings extends Component {
                         text: 'Booking Date'
                     },
                     {
-                        dataField: 'created_formattted',
+                        dataField: 'created_formatted',
                         text: 'Created'
                     },
                     {
@@ -175,24 +179,34 @@ export default class Bookings extends Component {
                     }
                 ];
 
-        const data = this.state.bookings.map( m => {
+        const data = this.state.bookings.map( (b, index) => {
 
-            m._status = m.status === 1  ? <span className="text-success">Active <FontAwesomeIcon style={ { cursor: 'pointer' } } onClick={ () => this.updateStatus( m ) } icon={faCheckCircle} data-tip="Deactivate this meeting room" /></span> : <span className="text-danger">Inactive <FontAwesomeIcon data-tip="Activate this meeting room" style={ { cursor: 'pointer'} } onClick={ () => this.updateStatus(m) } icon={faCheckCircle} /></span>
+            b.index = index + 1;
 
-            m.actions = <Fragment>
+            b.booking_number = b.id;
+
+            b.booking_date = b.date;
+
+            b.created_formatted = b.created_at;
+
+            b.payment_status_text = 'Failed';
+
+            b.expired_status_text = 'Expired';
+
+            b.actions = <Fragment>
                             <Edit
-                                room={m}
+                                meetingrooms={this.state.meetingrooms}
                                 save={this.update} 
                             />
                             <Button 
                                 color="danger"
-                                onClick={() => this.delete(m.id)}
+                                onClick={() => this.delete(b.id)}
                             >
                                 <FontAwesomeIcon icon={faTrash} />
                             </Button>
                         </Fragment>
 
-            return m;
+            return b;
 
         })
 
@@ -210,6 +224,7 @@ export default class Bookings extends Component {
 
                             <Add
                                 save={this.save} 
+                                meetingrooms={this.state.meetingrooms}
                             />
 
                             <Card>
@@ -246,17 +261,35 @@ class Add extends Component {
         this.state = {
 
             open: false,
-            name: '',
-            amount_1: 0,
-            amount_2: 0,
-            amount_4: 0,
-            amount_8: 0,
-            status: 1,
-            errorName: false,
-            errorAmount1: false,
-            errorAmount2: false,
-            errorAmount4: false,
-            errorAmount8: false
+            client_id: 0,
+            client_name: '',
+            meeting_room_id: 0,
+            booking_date: '',
+            from_time : '',
+            to_time: '',
+            duration: 0,
+            description: '',
+            errorClientName: false,
+            errorMeetingRoom: false,
+            errorBookingDate: false,
+            errorFromTime: false,
+            errorDuration: false,
+            payment_type: 0,
+            card_first_name: '',
+            card_last_name: '',
+            card_city: '',
+            card_postcode: '',
+            card_address: '',
+            card_country: 'uk',
+            offline_notes: '',
+            lookup: false,
+            founds: [],
+            errorCardFirstName: false,
+            errorCardLastName: false,
+            errorCardCity: false,
+            errorCardPostCode: false,
+            errorCardAddress: false,
+            errorCardCountry: false
             
         }
 
@@ -264,66 +297,173 @@ class Add extends Component {
         this.close = this.close.bind(this);
         this.change = this.change.bind(this);
         this.save = this.save.bind(this);
+        this.setPaymentType = this.setPaymentType.bind(this);
+        this.selectClient = this.selectClient.bind(this);
+        this.search = this.search.bind(this);
+    }
+
+    search(e) {
+
+        const value = e.target.value;
+
+        this.setState( { search_client: value, lookup: true } , () => {
+
+            if (value.length > 1) {
+                Authservice.post( '/clients/lookup',  { client: value })
+                .then( response => {
+                    if (response.clients) {
+                        this.setState( { founds: response.clients, lookup: true } )
+                    }
+                });
+            }
+        });
+    }
+
+    selectClient(client) {
+        this.setState( {
+
+            lookup: false,
+            client_id: client.id,
+            client_name: `${client.firstname} ${client.lastname}`,
+            card_first_name: client.firstname,
+            card_last_name: client.lastname
+
+        } )
+    }
+
+    setPaymentType(payment_type) {
+
+        this.setState({payment_type});
 
     }
 
     save() {
 
-        let valid = true;
-        let errorName = false;
-        let errorAmount1 = false;
-        let errorAmount2 = false;
-        let errorAmount4 = false;
-        let errorAmount8 = false;
+        let valid = true;      
+        let errorClientName = false;
+        let errorMeetingRoom = false;
+        let errorBookingDate = false;
+        let errorFromTime = false;
+        let errorDuration = false;
+        let errorCardFirstName = false;
+        let errorCardLastName = false;
+        let errorCardCity = false;
+        let errorCardPostCode = false;
+        let errorCardAddress = false;
+        let errorCardCountry = false;
+        
+        const {
+                    client_id, 
+                    client_name, 
+                    meeting_room_id,
+                    booking_date, 
+                    from_time, 
+                    duration, 
+                    card_first_name, 
+                    card_last_name, 
+                    card_city, 
+                    card_postcode, 
+                    card_country,
+                    card_address,
+                    payment_type,
+                    to_time
+                } = this.state;
 
-        const {name, amount_1, amount_2, amount_4, amount_8, status} = this.state;
-
-        if (name === '') {
+        if (client_id === 0 || client_name === '') {
 
             valid = false;
-            errorName = true;
+            errorClientName = true;
 
         }
 
-        if (amount_1 === 0) {
+        if (meeting_room_id === 0) {
 
             valid = false;
-            errorAmount1 = true;
+            errorMeetingRoom = true;
 
         }
 
-        if (amount_2 === 0) {
+        if (booking_date === '') {
 
             valid = false;
-            errorAmount2 = true;
+            errorBookingDate = true;
 
         }
 
-        if (amount_4 === 0) {
+        if (from_time === '') {
 
             valid = false;
-            errorAmount4 = true;
+            errorFromTime = true;
 
         }
 
-        if (amount_8 === 0) {
+        if (parseInt(duration) === 0) {
 
             valid = false;
-            errorAmount8 = true;
+            errorDuration = true;
+
+        }
+
+        if (payment_type === 1) {
+
+            if (card_first_name === '') {
+
+                valid = false;
+                errorCardFirstName = true;
+    
+            }
+
+            if (card_last_name === '') {
+
+                valid = false;
+                errorCardLastName = true;
+    
+            }
+
+            if (card_city === '') {
+
+                valid = false;
+                errorCardCity = true;
+    
+            }
+
+            if (card_postcode === '') {
+
+                valid = false;
+                errorCardPostCode = true;
+    
+            }
+
+            if (card_address === '') {
+
+                valid = false;
+                errorCardAddress = true;
+    
+            }
+
 
         }
 
         if (valid) {
 
-            const data = {name, amount_1, amount_2, amount_4, amount_8, status}
+            const data = {
+                            client_id, 
+                            client_name, 
+                            meeting_room_id,
+                            booking_date, 
+                            from_time, 
+                            duration, 
+                            card_first_name, 
+                            card_last_name, 
+                            card_city, 
+                            card_postcode, 
+                            card_country,
+                            card_address,
+                            payment_type,
+                            to_time
+                        }
 
             this.setState({
-                name: '',
-                amount_1: 0,
-                amount_2: 0,
-                amount_4: 0,
-                amount_8: 0,
-                status: 1,
                 open: false
             }, () => {
 
@@ -334,11 +474,17 @@ class Add extends Component {
         } else {
 
             this.setState({
-                errorName,
-                errorAmount1,
-                errorAmount2,
-                errorAmount4,
-                errorAmount8
+                errorClientName,
+                errorMeetingRoom,
+                errorBookingDate,
+                errorFromTime,
+                errorDuration,
+                errorCardFirstName,
+                errorCardLastName,
+                errorCardCity,
+                errorCardPostCode,
+                errorCardAddress,
+                errorCardCountry
             })
 
         }
@@ -349,11 +495,17 @@ class Add extends Component {
 
         this.setState({
             [e.target.name] : e.target.value,
-            errorName: false,
-            errorAmount1: false,
-            errorAmount2: false,
-            errorAmount4: false,
-            errorAmount8: false
+            errorClientName: false,
+            errorMeetingRoom: false,
+            errorBookingDate: false,
+            errorFromTime: false,
+            errorDuration: false,
+            errorCardFirstName: false,
+            errorCardLastName: false,
+            errorCardCity: false,
+            errorCardPostCode: false,
+            errorCardAddress: false,
+            errorCardCountry: false
         });
 
     }
@@ -372,6 +524,8 @@ class Add extends Component {
 
     render() {
 
+        const founds = this.state.lookup ? <Found clients={ this.state.founds } select={this.selectClient} /> : '';
+
         return (
 
             <Fragment>
@@ -389,94 +543,319 @@ class Add extends Component {
                     <ModalBody>
                         <Row>
                             <Col md={6}>
-                        <FormGroup row>
-                            <Col md={6}>
-                                <Label>Client Name</Label>
-                                <Input 
-                                    type="text" 
-                                    name="name"
-                                    placeholder="Search Client"
-                                    onChange={this.change}
-                                />
-                            </Col>
-                            <Col md={6}>
-                                <Label>&nbsp;</Label>
-                                <Input type="text" 
-                                    value={this.state.client_name}
-                                    placeholder="Client Name"
-                                    name="client_name"
-                                />
-                            </Col>
-                        </FormGroup>
+                                <FormGroup row>
+                                    <Col md={6}>
+                                        <Label>Client Name</Label>
+                                        <Input 
+                                            type="text" 
+                                            name="name"
+                                            placeholder="Search Client"
+                                            onChange={this.search}
+                                        />
+                                        { founds }
+                                    </Col>
+                                    <Col md={6}>
+                                        <Label>&nbsp;</Label>
+                                        <Input type="text" 
+                                            value={this.state.client_name}
+                                            placeholder="Client Name"
+                                            name="client_name"
+                                            className={this.state.errorClientName ? 'is-invalid' : '' }
+                                        />
+                                        { this.state.errorClientName ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
+                                </FormGroup>
 
-                        <FormGroup row>
-                            <Col md={6}>
-                                <Label>Meeting Room</Label>
-                                <Input 
-                                    type="select" 
-                                    name="meeting_room_id"
-                                    className="form-control"
-                                    value={this.state.meeting_room_id}
-                                    onChange={this.change}
-                                >
-                                    <option value="0">Select meeting room</option>
-                                </Input>
-                                
+                                <FormGroup row>
+                                    <Col md={6}>
+                                        <Label>Meeting Room</Label>
+                                        <Input 
+                                            type="select" 
+                                            name="meeting_room_id"
+                                            value={this.state.meeting_room_id}
+                                            onChange={this.change}
+                                            className={`${this.state.errorMeetingRoom ? 'is-invalid' : ''} form-control`}
+                                        >
+                                            <option value="0">Select meeting room</option>
+                                            {
+                                                this.props.meetingrooms.map( m => {
+
+                                                    return <option key={m.id} value={m.id}>{m.name}</option>
+
+                                                })
+                                            }
+                                        </Input>
+                                        { this.state.errorMeetingRoom ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
+
+                                    <Col md={6}>
+                                        <Label>Booking Date</Label>
+                                        <Input 
+                                            type="date" 
+                                            name="booking_date"
+                                            value={this.state.booking_date}
+                                            onChange={this.change}
+                                            className={this.state.errorBookingDate ? 'is-invalid' : '' }
+                                        />
+                                        { this.state.errorBookingDate ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
+                                </FormGroup>
+
+                                <FormGroup row>
+                                    <Col md={6}>
+                                        <Label>From Time</Label>
+                                        <Input 
+                                            type="time" 
+                                            name="from_time"
+                                            value={this.state.from_time}
+                                            onChange={this.change}
+                                            className={this.state.errorFromTime ? 'is-invalid' : '' }
+                                        />
+                                        { this.state.errorFromTime ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
+
+                                    <Col md={6}>
+                                        <Label>Duration</Label>
+                                        <Input 
+                                            type="select" 
+                                            name="duration"
+                                            className={`${this.state.errorDuration ? 'is-invalid' : ''} form-control`}
+                                            value={this.state.duration}
+                                            onChange={this.change}
+                                        >
+                                            <option key="0hr" value="0">Select duration</option>
+                                            <option key="1hr" value="1">1 Hr</option>
+                                            <option key="2hr" value="2">2 Hrs</option>
+                                            <option key="4hr" value="4">4 Hrs</option>
+                                            <option key="8hr" value="8">8 Hrs</option>
+                                        </Input>
+                                        { this.state.errorDuration ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
+                                </FormGroup>
+
+                                <FormGroup>
+                                    <Label>
+                                        Description
+                                    </Label>
+                                    <Input
+                                        type="textarea"
+                                        name="description"
+                                        value={this.state.description}
+                                        placeholder="Description" 
+                                        onChange={this.change}
+                                    />
+                                </FormGroup>
                             </Col>
 
                             <Col md={6}>
-                                <Label>Booking Date</Label>
-                                <Input 
-                                    type="date" 
-                                    name="booking_date"
-                                    value={this.state.booking_date}
-                                    onChange={this.change}
-                                    
-                                />
-                            </Col>
-                        </FormGroup>
 
-                        <FormGroup row>
-                            <Col md={6}>
-                                <Label>From Time</Label>
-                                <Input 
-                                    type="time" 
-                                    name="from_time"
-                                    value={this.state.from_time}
-                                    onChange={this.change}
-                                />
-                            </Col>
+                                <FormGroup>
+                                    <Label>Payment Type</Label>
+                                </FormGroup>
 
-                            <Col md={6}>
-                                <Label>Duration</Label>
-                                <Input 
-                                    type="select" 
-                                    name="duration"
-                                    className="form-control"
-                                    value={this.state.duration}
-                                    onChange={this.change}
-                                >
-                                    <option value="0">Select duration</option>
-                                    <option value="1">1 Hr</option>
-                                    <option value="2">2 Hrs</option>
-                                    <option value="4">4 Hrs</option>
-                                    <option value="8">8 Hrs</option>
-                                </Input>
-                            </Col>
-                        </FormGroup>
+                                <FormGroup check inline>
+                                    <Label className="mr-4">
+                                        <Input checked={this.state.payment_type === 1} onClick={() => this.setPaymentType(1) } type="radio" /> Online
+                                    </Label>
 
-                        <FormGroup>
-                            <Label>
-                                Description
-                            </Label>
-                            <Input
-                                type="textarea"
-                                name="description"
-                                value={this.state.description}
-                                placeholder="Description" 
-                                onChange={this.change}
-                            />
-                        </FormGroup>
+                                    <Label className="mr-2">
+                                        <Input checked={this.state.payment_type === 0} onClick={() => this.setPaymentType(0) } type="radio" /> Offline
+                                    </Label>
+
+                                    <Label>
+                                        <Input checked={this.state.payment_type === 2} onClick={() => this.setPaymentType(2) } type="radio" /> Free of Charge
+                                    </Label>
+                                </FormGroup>
+
+                                {
+                                    this.state.payment_type === 1 ?
+
+                                    <Fragment>
+
+                                        <div>(When you select "Online" it will direct you to Sage Pay to make your payment)</div>
+
+                                        <FormGroup>
+
+                                            <Label>Card Details:</Label>
+
+                                        </FormGroup>
+
+                                        <FormGroup row>
+
+                                            <Col md={6}>
+
+                                                <Label>First Name</Label>
+
+                                                <Input 
+                                                    value={this.state.card_first_name} 
+                                                    onChange={this.change}  
+                                                    type="text" 
+                                                    name="card_first_name" 
+                                                    className={this.state.errorCardFirstName ? 'is-invalid' : '' }
+                                                />
+
+                                                { this.state.errorCardFirstName ?
+                                                    <span className="d-block invalid-feedback" role="alert">
+                                                        <strong>this is required</strong>
+                                                    </span>
+                                                : '' }
+
+                                            </Col>
+
+                                            <Col md={6}>
+
+                                                <Label>Last Name</Label>
+
+                                                <Input 
+                                                    value={this.state.card_last_name} 
+                                                    onChange={this.change}  
+                                                    type="text" 
+                                                    name="card_last_name" 
+                                                    className={this.state.errorCardLastName ? 'is-invalid' : '' }
+                                                />
+
+                                                { this.state.errorCardLastName ?
+                                                    <span className="d-block invalid-feedback" role="alert">
+                                                        <strong>this is required</strong>
+                                                    </span>
+                                                : '' }
+
+                                            </Col>
+
+                                        </FormGroup>
+
+                                        <FormGroup row>
+
+                                            <Col md={6}>
+
+                                                <Label>City</Label>
+
+                                                <Input 
+                                                    value={this.state.card_city} 
+                                                    onChange={this.change}  
+                                                    type="text" 
+                                                    name="card_city" 
+                                                    className={this.state.errorCardCity ? 'is-invalid' : '' }
+                                                />
+
+                                                { this.state.errorCardCity ?
+                                                    <span className="d-block invalid-feedback" role="alert">
+                                                        <strong>this is required</strong>
+                                                    </span>
+                                                : '' }
+
+                                            </Col>
+
+                                            <Col md={6}>
+
+                                                <Label>Postcode</Label>
+
+                                                <Input 
+                                                    value={this.state.card_postcode} 
+                                                    onChange={this.change}  
+                                                    type="text" 
+                                                    name="card_postcode" 
+                                                    className={this.state.errorCardPostCode ? 'is-invalid' : '' }
+                                                />
+
+                                                { this.state.errorCardPostCode ?
+                                                    <span className="d-block invalid-feedback" role="alert">
+                                                        <strong>this is required</strong>
+                                                    </span>
+                                                : '' }
+
+                                            </Col>
+
+                                        </FormGroup>
+
+                                        <FormGroup row>
+
+                                            <Col md={6}>
+
+                                                <Label>Street and Number</Label>
+
+                                                <Input 
+                                                    value={this.state.card_address} 
+                                                    onChange={this.change}  
+                                                    type="text" 
+                                                    name="card_address" 
+                                                    className={this.state.errorCardAddress ? 'is-invalid' : '' }
+                                                />
+
+                                                { this.state.errorCardAddress ?
+                                                    <span className="d-block invalid-feedback" role="alert">
+                                                        <strong>this is required</strong>
+                                                    </span>
+                                                : '' }
+
+                                            </Col>
+
+                                            <Col md={6}>
+
+                                                <Label>Country</Label>
+
+                                                <Input 
+                                                    value={this.state.card_country} 
+                                                    onChange={this.change}  
+                                                    type="select" 
+                                                    name="card_country" 
+                                                    className="form-control"
+                                                >
+                                                    <option key="uk" value="uk">United Kingdom</option>
+                                                </Input>                                                
+
+                                            </Col>
+
+                                        </FormGroup>
+
+
+
+                                    </Fragment>
+
+                                    : '' 
+                                }
+
+                                { this.state.payment_type === 0 ?
+
+                                    <Fragment>
+
+                                        <FormGroup>
+
+                                            <Label>Offline Notes</Label>
+
+                                            <Input 
+                                                value={this.state.offline_notes} 
+                                                onChange={this.change} 
+                                                type="textarea" 
+                                                name="offline_notes" 
+                                                placeholder="Offline Notes" 
+                                            />                                         
+
+                                        </FormGroup>
+
+                                    </Fragment>
+
+                                : '' }
                             </Col>
                         </Row>
                     </ModalBody>
@@ -498,88 +877,210 @@ class Edit extends Component {
 
         super(props);
 
-        const room = props.room;
-
-        const name = room.name;
-        const amount_1 = room.amount_1;
-        const amount_2 = room.amount_2;
-        const amount_4 = room.amount_4;
-        const amount_8 = room.amount_8;
-        const status = room.status;
-        const id = room.id;
-
         this.state = {
+
             open: false,
-            name: name,
-            id,
-            amount_1: amount_1,
-            amount_2: amount_2,
-            amount_4: amount_4,
-            amount_8: amount_8,
-            status: status,
-            errorName: false,
-            errorAmount1: false,
-            errorAmount2: false,
-            errorAmount4: false,
-            errorAmount8: false
+            client_id: 0,
+            client_name: '',
+            meeting_room_id: 0,
+            booking_date: '',
+            from_time : '',
+            to_time: '',
+            duration: 0,
+            description: '',
+            errorClientName: false,
+            errorMeetingRoom: false,
+            errorBookingDate: false,
+            errorFromTime: false,
+            errorDuration: false,
+            payment_type: 0,
+            card_first_name: '',
+            card_last_name: '',
+            card_city: '',
+            card_postcode: '',
+            card_address: '',
+            card_country: 'uk',
+            offline_notes: '',
+            lookup: false,
+            founds: [],
+            errorCardFirstName: false,
+            errorCardLastName: false,
+            errorCardCity: false,
+            errorCardPostCode: false,
+            errorCardAddress: false,
+            errorCardCountry: false
+            
         }
 
         this.open = this.open.bind(this);
         this.close = this.close.bind(this);
         this.change = this.change.bind(this);
         this.save = this.save.bind(this);
+        this.setPaymentType = this.setPaymentType.bind(this);
+        this.selectClient = this.selectClient.bind(this);
+        this.search = this.search.bind(this);
+    }
+
+    search(e) {
+
+        const value = e.target.value;
+
+        this.setState( { search_client: value, lookup: true } , () => {
+
+            if (value.length > 1) {
+                Authservice.post( '/clients/lookup',  { client: value })
+                .then( response => {
+                    if (response.clients) {
+                        this.setState( { founds: response.clients, lookup: true } )
+                    }
+                });
+            }
+        });
+    }
+
+    selectClient(client) {
+        this.setState( {
+
+            lookup: false,
+            client_id: client.id,
+            client_name: `${client.firstname} ${client.lastname}`,
+            card_first_name: client.firstname,
+            card_last_name: client.lastname
+
+        } )
+    }
+
+    setPaymentType(payment_type) {
+
+        this.setState({payment_type});
 
     }
 
     save() {
 
-        let valid = true;
-        let errorName = false;
-        let errorAmount1 = false;
-        let errorAmount2 = false;
-        let errorAmount4 = false;
-        let errorAmount8 = false;
+        let valid = true;      
+        let errorClientName = false;
+        let errorMeetingRoom = false;
+        let errorBookingDate = false;
+        let errorFromTime = false;
+        let errorDuration = false;
+        let errorCardFirstName = false;
+        let errorCardLastName = false;
+        let errorCardCity = false;
+        let errorCardPostCode = false;
+        let errorCardAddress = false;
+        let errorCardCountry = false;
+        
+        const {
+                    client_id, 
+                    client_name, 
+                    meeting_room_id,
+                    booking_date, 
+                    from_time, 
+                    duration, 
+                    card_first_name, 
+                    card_last_name, 
+                    card_city, 
+                    card_postcode, 
+                    card_country,
+                    card_address,
+                    payment_type,
+                    to_time
+                } = this.state;
 
-        const {name, amount_1, amount_2, amount_4, amount_8, status, id} = this.state;
-
-        if (name === '') {
+        if (client_id === 0 || client_name === '') {
 
             valid = false;
-            errorName = true;
+            errorClientName = true;
 
         }
 
-        if (amount_1 === 0) {
+        if (meeting_room_id === 0) {
 
             valid = false;
-            errorAmount1 = true;
+            errorMeetingRoom = true;
 
         }
 
-        if (amount_2 === 0) {
+        if (booking_date === '') {
 
             valid = false;
-            errorAmount2 = true;
+            errorBookingDate = true;
 
         }
 
-        if (amount_4 === 0) {
+        if (from_time === '') {
 
             valid = false;
-            errorAmount4 = true;
+            errorFromTime = true;
 
         }
 
-        if (amount_8 === 0) {
+        if (parseInt(duration) === 0) {
 
             valid = false;
-            errorAmount8 = true;
+            errorDuration = true;
+
+        }
+
+        if (payment_type === 1) {
+
+            if (card_first_name === '') {
+
+                valid = false;
+                errorCardFirstName = true;
+    
+            }
+
+            if (card_last_name === '') {
+
+                valid = false;
+                errorCardLastName = true;
+    
+            }
+
+            if (card_city === '') {
+
+                valid = false;
+                errorCardCity = true;
+    
+            }
+
+            if (card_postcode === '') {
+
+                valid = false;
+                errorCardPostCode = true;
+    
+            }
+
+            if (card_address === '') {
+
+                valid = false;
+                errorCardAddress = true;
+    
+            }
+
 
         }
 
         if (valid) {
 
-            const data = {name, amount_1, amount_2, amount_4, amount_8, status, id}
+            const data = {
+                            client_id, 
+                            client_name, 
+                            meeting_room_id,
+                            booking_date, 
+                            from_time, 
+                            duration, 
+                            card_first_name, 
+                            card_last_name, 
+                            card_city, 
+                            card_postcode, 
+                            card_country,
+                            card_address,
+                            payment_type,
+                            to_time
+                        }
 
             this.setState({
                 open: false
@@ -592,11 +1093,17 @@ class Edit extends Component {
         } else {
 
             this.setState({
-                errorName,
-                errorAmount1,
-                errorAmount2,
-                errorAmount4,
-                errorAmount8
+                errorClientName,
+                errorMeetingRoom,
+                errorBookingDate,
+                errorFromTime,
+                errorDuration,
+                errorCardFirstName,
+                errorCardLastName,
+                errorCardCity,
+                errorCardPostCode,
+                errorCardAddress,
+                errorCardCountry
             })
 
         }
@@ -607,11 +1114,17 @@ class Edit extends Component {
 
         this.setState({
             [e.target.name] : e.target.value,
-            errorName: false,
-            errorAmount1: false,
-            errorAmount2: false,
-            errorAmount4: false,
-            errorAmount8: false
+            errorClientName: false,
+            errorMeetingRoom: false,
+            errorBookingDate: false,
+            errorFromTime: false,
+            errorDuration: false,
+            errorCardFirstName: false,
+            errorCardLastName: false,
+            errorCardCity: false,
+            errorCardPostCode: false,
+            errorCardAddress: false,
+            errorCardCountry: false
         });
 
     }
@@ -630,118 +1143,372 @@ class Edit extends Component {
 
     render() {
 
+        const founds = this.state.lookup ? <Found clients={ this.state.founds } select={this.selectClient} /> : '';
+
         return (
 
             <Fragment>
-                <Button onClick={this.open} className="mr-1" color="primary"><FontAwesomeIcon icon={faEdit} /></Button>
-                <Modal isOpen={this.state.open} toggle={this.close}>
+               
+                <Button className="mr-1" onClick={this.open} color="primary"><FontAwesomeIcon icon={faEdit} /> </Button>
+                
+                <Modal isOpen={this.state.open} toggle={this.close} className="mw-100 w-75">
                     <ModalHeader>
-                        Edit Meeting Room
+                        Edit Booking
                     </ModalHeader>
                     <ModalBody>
-                        <FormGroup>
-                            <Label>Name</Label>
-                            <Input 
-                                type="text" 
-                                name="name"
-                                className={`${this.state.errorName ? 'is-invalid' : ''}`}
-                                value={this.state.name}
-                                onChange={this.change}
-                            />
-                            { this.state.errorName ? 
-                                <span className="d-block invalid-feedback" role="alert">
-                                    <strong>this is required</strong>
-                                </span>
-                            : '' }
-                        </FormGroup>
-
-                        <FormGroup row>
+                        <Row>
                             <Col md={6}>
-                                <Label>Amount For 1 Hr</Label>
-                                <Input 
-                                    type="number" 
-                                    name="amount_1"
-                                    className={`${this.state.errorAmount1 ? 'is-invalid' : ''}`}
-                                    value={this.state.amount_1}
-                                    onChange={this.change}
-                                />
-                                { this.state.errorAmount1 ? 
-                                <span className="d-block invalid-feedback" role="alert">
-                                    <strong>this is required</strong>
-                                </span>
-                            : '' }
+                                <FormGroup row>
+                                    <Col md={6}>
+                                        <Label>Client Name</Label>
+                                        <Input 
+                                            type="text" 
+                                            name="name"
+                                            placeholder="Search Client"
+                                            onChange={this.search}
+                                        />
+                                        { founds }
+                                    </Col>
+                                    <Col md={6}>
+                                        <Label>&nbsp;</Label>
+                                        <Input type="text" 
+                                            value={this.state.client_name}
+                                            placeholder="Client Name"
+                                            name="client_name"
+                                            className={this.state.errorClientName ? 'is-invalid' : '' }
+                                        />
+                                        { this.state.errorClientName ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
+                                </FormGroup>
+
+                                <FormGroup row>
+                                    <Col md={6}>
+                                        <Label>Meeting Room</Label>
+                                        <Input 
+                                            type="select" 
+                                            name="meeting_room_id"
+                                            value={this.state.meeting_room_id}
+                                            onChange={this.change}
+                                            className={`${this.state.errorMeetingRoom ? 'is-invalid' : ''} form-control`}
+                                        >
+                                            <option value="0">Select meeting room</option>
+                                            {
+                                                this.props.meetingrooms.map( m => {
+
+                                                    return <option key={m.id} value={m.id}>{m.name}</option>
+
+                                                })
+                                            }
+                                        </Input>
+                                        { this.state.errorMeetingRoom ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
+
+                                    <Col md={6}>
+                                        <Label>Booking Date</Label>
+                                        <Input 
+                                            type="date" 
+                                            name="booking_date"
+                                            value={this.state.booking_date}
+                                            onChange={this.change}
+                                            className={this.state.errorBookingDate ? 'is-invalid' : '' }
+                                        />
+                                        { this.state.errorBookingDate ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
+                                </FormGroup>
+
+                                <FormGroup row>
+                                    <Col md={6}>
+                                        <Label>From Time</Label>
+                                        <Input 
+                                            type="time" 
+                                            name="from_time"
+                                            value={this.state.from_time}
+                                            onChange={this.change}
+                                            className={this.state.errorFromTime ? 'is-invalid' : '' }
+                                        />
+                                        { this.state.errorFromTime ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
+
+                                    <Col md={6}>
+                                        <Label>Duration</Label>
+                                        <Input 
+                                            type="select" 
+                                            name="duration"
+                                            className={`${this.state.errorDuration ? 'is-invalid' : ''} form-control`}
+                                            value={this.state.duration}
+                                            onChange={this.change}
+                                        >
+                                            <option key="0hr" value="0">Select duration</option>
+                                            <option key="1hr" value="1">1 Hr</option>
+                                            <option key="2hr" value="2">2 Hrs</option>
+                                            <option key="4hr" value="4">4 Hrs</option>
+                                            <option key="8hr" value="8">8 Hrs</option>
+                                        </Input>
+                                        { this.state.errorDuration ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
+                                </FormGroup>
+
+                                <FormGroup>
+                                    <Label>
+                                        Description
+                                    </Label>
+                                    <Input
+                                        type="textarea"
+                                        name="description"
+                                        value={this.state.description}
+                                        placeholder="Description" 
+                                        onChange={this.change}
+                                    />
+                                </FormGroup>
                             </Col>
 
                             <Col md={6}>
-                                <Label>Amount For 2 Hrs</Label>
-                                <Input 
-                                    type="number" 
-                                    name="amount_2"
-                                    value={this.state.amount_2}
-                                    onChange={this.change}
-                                    className={`${this.state.errorAmount2 ? 'is-invalid' : ''}`}
-                                />
-                                { this.state.errorAmount2 ? 
-                                <span className="d-block invalid-feedback" role="alert">
-                                    <strong>this is required</strong>
-                                </span>
-                            : '' }
-                            </Col>
-                        </FormGroup>
 
-                        <FormGroup row>
-                            <Col md={6}>
-                                <Label>Amount For 4 Hrs</Label>
-                                <Input 
-                                    type="number" 
-                                    name="amount_4"
-                                    className={`${this.state.errorAmount4 ? 'is-invalid' : ''}`}
-                                    value={this.state.amount_4}
-                                    onChange={this.change}
-                                />
-                                { this.state.errorAmount4 ? 
-                                <span className="d-block invalid-feedback" role="alert">
-                                    <strong>this is required</strong>
-                                </span>
-                            : '' }
-                            </Col>
+                                <FormGroup>
+                                    <Label>Payment Type</Label>
+                                </FormGroup>
 
-                            <Col md={6}>
-                                <Label>Amount For 8 Hrs</Label>
-                                <Input 
-                                    type="number" 
-                                    name="amount_8"
-                                    value={this.state.amount_8}
-                                    onChange={this.change}
-                                    className={`${this.state.errorAmount8 ? 'is-invalid' : ''}`}
-                                />
-                                { this.state.errorAmount8 ? 
-                                <span className="d-block invalid-feedback" role="alert">
-                                    <strong>this is required</strong>
-                                </span>
-                            : '' }
-                            </Col>
-                        </FormGroup>
+                                <FormGroup check inline>
+                                    <Label className="mr-4">
+                                        <Input checked={this.state.payment_type === 1} onClick={() => this.setPaymentType(1) } type="radio" /> Online
+                                    </Label>
 
-                        <FormGroup>
-                            <Label>
-                                <Input 
-                                    type="checkbox"
-                                    className="ml-0 mr-0 position-relative"
-                                    checked={this.state.status === 1}
-                                    onChange={ () => this.setState({
-                                        status: this.state.status === 1 ? 0 : 1
-                                    }) }
-                                /> Status
-                            </Label>
-                        </FormGroup>
+                                    <Label className="mr-2">
+                                        <Input checked={this.state.payment_type === 0} onClick={() => this.setPaymentType(0) } type="radio" /> Offline
+                                    </Label>
+
+                                    <Label>
+                                        <Input checked={this.state.payment_type === 2} onClick={() => this.setPaymentType(2) } type="radio" /> Free of Charge
+                                    </Label>
+                                </FormGroup>
+
+                                {
+                                    this.state.payment_type === 1 ?
+
+                                    <Fragment>
+
+                                        <div>(When you select "Online" it will direct you to Sage Pay to make your payment)</div>
+
+                                        <FormGroup>
+
+                                            <Label>Card Details:</Label>
+
+                                        </FormGroup>
+
+                                        <FormGroup row>
+
+                                            <Col md={6}>
+
+                                                <Label>First Name</Label>
+
+                                                <Input 
+                                                    value={this.state.card_first_name} 
+                                                    onChange={this.change}  
+                                                    type="text" 
+                                                    name="card_first_name" 
+                                                    className={this.state.errorCardFirstName ? 'is-invalid' : '' }
+                                                />
+
+                                                { this.state.errorCardFirstName ?
+                                                    <span className="d-block invalid-feedback" role="alert">
+                                                        <strong>this is required</strong>
+                                                    </span>
+                                                : '' }
+
+                                            </Col>
+
+                                            <Col md={6}>
+
+                                                <Label>Last Name</Label>
+
+                                                <Input 
+                                                    value={this.state.card_last_name} 
+                                                    onChange={this.change}  
+                                                    type="text" 
+                                                    name="card_last_name" 
+                                                    className={this.state.errorCardLastName ? 'is-invalid' : '' }
+                                                />
+
+                                                { this.state.errorCardLastName ?
+                                                    <span className="d-block invalid-feedback" role="alert">
+                                                        <strong>this is required</strong>
+                                                    </span>
+                                                : '' }
+
+                                            </Col>
+
+                                        </FormGroup>
+
+                                        <FormGroup row>
+
+                                            <Col md={6}>
+
+                                                <Label>City</Label>
+
+                                                <Input 
+                                                    value={this.state.card_city} 
+                                                    onChange={this.change}  
+                                                    type="text" 
+                                                    name="card_city" 
+                                                    className={this.state.errorCardCity ? 'is-invalid' : '' }
+                                                />
+
+                                                { this.state.errorCardCity ?
+                                                    <span className="d-block invalid-feedback" role="alert">
+                                                        <strong>this is required</strong>
+                                                    </span>
+                                                : '' }
+
+                                            </Col>
+
+                                            <Col md={6}>
+
+                                                <Label>Postcode</Label>
+
+                                                <Input 
+                                                    value={this.state.card_postcode} 
+                                                    onChange={this.change}  
+                                                    type="text" 
+                                                    name="card_postcode" 
+                                                    className={this.state.errorCardPostCode ? 'is-invalid' : '' }
+                                                />
+
+                                                { this.state.errorCardPostCode ?
+                                                    <span className="d-block invalid-feedback" role="alert">
+                                                        <strong>this is required</strong>
+                                                    </span>
+                                                : '' }
+
+                                            </Col>
+
+                                        </FormGroup>
+
+                                        <FormGroup row>
+
+                                            <Col md={6}>
+
+                                                <Label>Street and Number</Label>
+
+                                                <Input 
+                                                    value={this.state.card_address} 
+                                                    onChange={this.change}  
+                                                    type="text" 
+                                                    name="card_address" 
+                                                    className={this.state.errorCardAddress ? 'is-invalid' : '' }
+                                                />
+
+                                                { this.state.errorCardAddress ?
+                                                    <span className="d-block invalid-feedback" role="alert">
+                                                        <strong>this is required</strong>
+                                                    </span>
+                                                : '' }
+
+                                            </Col>
+
+                                            <Col md={6}>
+
+                                                <Label>Country</Label>
+
+                                                <Input 
+                                                    value={this.state.card_country} 
+                                                    onChange={this.change}  
+                                                    type="select" 
+                                                    name="card_country" 
+                                                    className="form-control"
+                                                >
+                                                    <option key="uk" value="uk">United Kingdom</option>
+                                                </Input>                                                
+
+                                            </Col>
+
+                                        </FormGroup>
+
+
+
+                                    </Fragment>
+
+                                    : '' 
+                                }
+
+                                { this.state.payment_type === 0 ?
+
+                                    <Fragment>
+
+                                        <FormGroup>
+
+                                            <Label>Offline Notes</Label>
+
+                                            <Input 
+                                                value={this.state.offline_notes} 
+                                                onChange={this.change} 
+                                                type="textarea" 
+                                                name="offline_notes" 
+                                                placeholder="Offline Notes" 
+                                            />                                         
+
+                                        </FormGroup>
+
+                                    </Fragment>
+
+                                : '' }
+                            </Col>
+                        </Row>
                     </ModalBody>
                     <ModalFooter>
                         <Button onClick={this.save} color="success"><FontAwesomeIcon icon={faSave} /> Save</Button>
                     </ModalFooter>
                 </Modal>
-
             </Fragment>
+
+        )
+
+    }
+
+}
+
+class Found extends Component {
+
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+
+        const clients = this.props.clients.map(c => {
+
+            return (
+                <div onClick={ () => this.props.select(c) } className="p-2">
+                    {c.firstname} {c.lastname} ( {c.email} )
+                </div>
+            )
+
+        })
+
+        return (
+
+            <div className="found-clients">
+                {clients}
+            </div>
 
         )
 
