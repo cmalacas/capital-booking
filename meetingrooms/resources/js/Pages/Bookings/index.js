@@ -10,7 +10,9 @@ import BootstrapTable from 'react-bootstrap-table-next';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-import { faPlus, faSave, faTrash, faEdit, faCheckCircle } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faSave, faTrash, faEdit, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+
+import { formatter, format_datetime, format_date } from '../../components/Functions';
 
 export default class Bookings extends Component {
 
@@ -185,9 +187,9 @@ export default class Bookings extends Component {
 
             b.booking_number = b.id;
 
-            b.booking_date = b.date;
+            b.booking_date = format_date(b.date);
 
-            b.created_formatted = b.created_at;
+            b.created_formatted = format_datetime(b.created_at);
 
             b.payment_status_text = 'Failed';
 
@@ -264,10 +266,12 @@ class Add extends Component {
             client_id: 0,
             client_name: '',
             meeting_room_id: 0,
+            meeting_room_name: '',
             booking_date: '',
             from_time : '',
             to_time: '',
             duration: 0,
+            total_amount: 0,
             description: '',
             errorClientName: false,
             errorMeetingRoom: false,
@@ -300,6 +304,220 @@ class Add extends Component {
         this.setPaymentType = this.setPaymentType.bind(this);
         this.selectClient = this.selectClient.bind(this);
         this.search = this.search.bind(this);
+        this.amount = this.amount.bind(this);
+        this.booking = this.booking.bind(this);
+        this.getTotalAmount = this.getTotalAmount.bind(this);
+    }
+
+    getTotalAmount() {
+
+        const { meeting_room_id, duration } = this.state;
+
+        const from_time = this.state.from_time.split(':');
+
+        let total_amount = 0;
+
+        let hour = parseInt(from_time[0]);
+
+        let to_time = '';
+
+        let meeting_room_name = '';
+
+        if (meeting_room_id > 0 && duration > 0) {
+
+            const room = this.props.meetingrooms.filter(r => { return r.id === parseInt(meeting_room_id) });
+
+            meeting_room_name = room[0].name;
+
+            if (parseInt(duration) === 1) {
+                
+                total_amount = room[0].amount_1;
+                hour += 1;
+
+            } else if (parseInt(duration) === 2) {
+
+                total_amount = room[0].amount_2;
+                hour += 2
+
+            } else if (parseInt(duration) === 4) {
+                
+                total_amount = room[0].amount_4;
+                hour += 4
+
+            } else if (parseInt(duration) === 8) {
+                
+                total_amount = room[0].amount_8;
+                hour += 8
+
+            }
+
+            if ( hour <= 9)  {
+
+                to_time = `0${hour}:${from_time[1]}`;
+            
+            } else if (hour > 24) {
+    
+                to_time = `0${hour - 24}:${from_time[1]}`;
+    
+            } else {
+    
+                to_time = `${hour}:${from_time[1]}`;
+    
+            }
+
+        }
+
+        this.setState({ 
+            total_amount, 
+            to_time, 
+            meeting_room_name 
+        })
+
+    }
+
+    booking() {
+
+        const room = this.props.meetingrooms.filter( r => { return r.id === parseInt(this.state.meeting_room_id) } );
+
+        const from_time = this.state.from_time.split(':');
+
+        let to_time = '';
+
+        let amount = 0;
+
+        let hour = parseInt(from_time[0]);
+
+        if (parseInt(this.state.duration) === 1) {
+
+            amount = room.length > 0 ? room[0].amount_1 : 0;
+
+            hour += 1;
+
+        }
+
+        if (parseInt(this.state.duration) === 2) {
+
+            amount = room.length > 0  ? room[0].amount_2 : 0;
+
+            hour += 2;
+
+        }
+
+        if (parseInt(this.state.duration) === 4) {
+
+            amount = room.length > 0  ? room[0].amount_4 : 0;
+
+            hour += 4;
+
+        }
+
+        if (parseInt(this.state.duration) === 8) {
+
+            amount = room.length > 0  ? room[0].amount_8 : 0;
+
+            hour += 8;
+
+        }
+
+        if ( hour <= 9)  {
+
+            to_time = `0${hour}:${from_time[1]}`;
+        
+        } else if (hour > 24) {
+
+            to_time = `0${hour - 24}:${from_time[1]}`;
+
+        } else {
+
+            to_time = `${hour}:${from_time[1]}`;
+
+        }
+
+        //this.setState( { total_amount: amount, to_time: to_time } )
+
+        return (
+
+            <Row className="bg bg-info p-2 mr-0 ml-0 mb-4">
+
+                <Col md={3} className="border-right border-white text-white">
+
+                    <Label>From Time:</Label>
+
+                    <h4 className="text-white">{ from_time[0] }:{ from_time[1] }</h4>
+
+                </Col>
+
+                <Col md={3} className="border-right border-white text-white">
+
+                    <Label>To Time:</Label>
+
+                    <h4 className="text-white">{ to_time }</h4>
+
+                </Col>
+
+                <Col md={3} className="border-right border-white text-white">
+
+                    <Label>Duration:</Label>
+
+                    <h4 className="text-white">{ this.state.duration } Hr</h4>
+
+                </Col>
+
+                <Col md={3} className="text-white">
+
+                    <Label>Amount:</Label>
+
+                    <h4 className="text-white">{ formatter.format(amount) }</h4>
+
+                </Col>
+
+            </Row>
+        )
+
+    }
+
+    amount() {
+
+        const room = this.props.meetingrooms.filter( r => { return r.id === parseInt(this.state.meeting_room_id) } );
+
+        return (
+
+            <Row className="bg bg-info p-2 mr-0 ml-0 mb-4">
+
+                <Col md={3} className="border-right border-white text-white">
+
+                    <Label>1 Hr:</Label>
+
+                    <h4 className="text-white">{ formatter.format(room[0].amount_1) }</h4>
+
+                </Col>
+
+                <Col md={3} className="border-right border-white text-white">
+
+                    <Label>2 Hr:</Label>
+
+                    <h4 className="text-white">{ formatter.format(room[0].amount_2) }</h4>
+
+                </Col>
+
+                <Col md={3} className="border-right border-white text-white">
+
+                    <Label>4 Hr:</Label>
+
+                    <h4 className="text-white">{ formatter.format(room[0].amount_4) }</h4>
+
+                </Col>
+
+                <Col md={3} className="text-white">
+
+                    <Label>8 Hr:</Label>
+
+                    <h4 className="text-white">{ formatter.format(room[0].amount_8) }</h4>
+
+                </Col>
+
+            </Row>
+        )
     }
 
     search(e) {
@@ -366,7 +584,9 @@ class Add extends Component {
                     card_country,
                     card_address,
                     payment_type,
-                    to_time
+                    to_time,
+                    total_amount,
+                    meeting_room_name
                 } = this.state;
 
         if (client_id === 0 || client_name === '') {
@@ -460,7 +680,9 @@ class Add extends Component {
                             card_country,
                             card_address,
                             payment_type,
-                            to_time
+                            to_time,
+                            total_amount,
+                            meeting_room_name
                         }
 
             this.setState({
@@ -506,7 +728,9 @@ class Add extends Component {
             errorCardPostCode: false,
             errorCardAddress: false,
             errorCardCountry: false
-        });
+        }, 
+            () => { this.getTotalAmount() }
+        );
 
     }
 
@@ -613,6 +837,13 @@ class Add extends Component {
                                     </Col>
                                 </FormGroup>
 
+                                { this.state.meeting_room_id > 0  ?
+
+                                    this.amount() 
+
+                                : ''  }
+
+
                                 <FormGroup row>
                                     <Col md={6}>
                                         <Label>From Time</Label>
@@ -652,6 +883,8 @@ class Add extends Component {
                                         : '' }
                                     </Col>
                                 </FormGroup>
+
+                                { this.state.from_time.length > 0 && this.state.duration > 0 ? this.booking() : '' }
 
                                 <FormGroup>
                                     <Label>
