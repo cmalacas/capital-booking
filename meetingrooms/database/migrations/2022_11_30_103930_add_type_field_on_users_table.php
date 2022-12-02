@@ -15,7 +15,7 @@ class AddTypeFieldOnUsersTable extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
 
-            $table->smallInteger('type')->default(0);
+            //$table->smallInteger('type')->default(0);
 
         });
     }

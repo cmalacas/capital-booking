@@ -10,7 +10,7 @@ import BootstrapTable from 'react-bootstrap-table-next';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-import { faPlus, faSave, faTrash, faEdit, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faSave, faTrash, faEdit, faCheckCircle, faTruckMedical } from '@fortawesome/free-solid-svg-icons';
 
 import { formatter, format_datetime, format_date } from '../../components/Functions';
 
@@ -88,7 +88,17 @@ export default class Bookings extends Component {
         Authservice.post('/bookings/save', data)
         .then(response => {
 
-            if (response.bookings) {
+            if (data.payment_type === 1) {
+
+                if (response.url) {
+
+                    sagepayWin = window.open(response.url, 'sagepay', 'width=999 height=999 scrolls resizable');
+                
+                    sagepayWin.focus();
+
+                }
+
+            } else if (response.bookings) {
 
                 this.setState({bookings: response.bookings});
 
@@ -157,11 +167,13 @@ export default class Bookings extends Component {
                     },
                     {
                         dataField: 'client_name',
-                        text: 'Client Name'
+                        text: 'Client Name',
+                        sort: true
                     },
                     {
                         dataField: 'booking_date',
-                        text: 'Booking Date'
+                        text: 'Booking Date',
+                        sort: true
                     },
                     {
                         dataField: 'created_formatted',
@@ -190,10 +202,6 @@ export default class Bookings extends Component {
             b.booking_date = format_date(b.date);
 
             b.created_formatted = format_datetime(b.created_at);
-
-            b.payment_status_text = 'Failed';
-
-            b.expired_status_text = 'Expired';
 
             b.actions = <Fragment>
                             <Edit
@@ -238,6 +246,8 @@ export default class Bookings extends Component {
                                         keyField='id' 
                                         data={ data } 
                                         columns={ columns } 
+                                        hover={true}
+                                        striped={true}
                                     />
                                 </CardBody>
                             </Card>
@@ -586,7 +596,8 @@ class Add extends Component {
                     payment_type,
                     to_time,
                     total_amount,
-                    meeting_room_name
+                    meeting_room_name,
+                    offline_notes
                 } = this.state;
 
         if (client_id === 0 || client_name === '') {
@@ -682,14 +693,15 @@ class Add extends Component {
                             payment_type,
                             to_time,
                             total_amount,
-                            meeting_room_name
+                            meeting_room_name,
+                            offline_notes
                         }
 
             this.setState({
                 open: false
             }, () => {
 
-                this.props.save(data);
+                this.props.save(data);                
 
             });
 

@@ -21,6 +21,8 @@ Route::group(['middleware' => 'auth:web'], function() {
         return view('welcome');
     }); 
 
+    Route::get('/checkout/online-payment', 'BookingController@onlinePayment');
+
     Route::get('/dashboard', function () {
         return view('welcome');
     });
@@ -53,6 +55,8 @@ Route::group(['middleware' => 'auth:web'], function() {
         Route::post('/update', 'BookingController@update');
         Route::post('/delete', 'BookingController@delete');
         Route::post('/update-status', 'BookingController@updateStatus');
+
+        Route::get('/{id}/success', 'BookingController@success');
 
     });
 

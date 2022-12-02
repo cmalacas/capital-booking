@@ -9,6 +9,7 @@ use App\MeetingRoom;
 
 use DB;
 use Omnipay\Omnipay;
+use App\Sagetransaction;
 
 class BookingController extends Controller
 {
@@ -17,11 +18,17 @@ class BookingController extends Controller
         $bookings = Booking::select(
                             'bookings.*',
                             DB::raw('CONCAT(firstname, " ", lastname) as client_name'),
-                            DB::raw('meetingrooms.name as meeting_room_name')
+                            DB::raw('meetingrooms.name as meeting_room_name'),
+                            DB::raw('IF(sagetransactions.payment_status = 1, "Success", "Pending") as payment_status_text'),
+                            DB::raw('IF(date < NOW(), "Expired", "Not Expired") as expired_status_text')
                         )
                         ->join('meetingrooms', 'meetingrooms.id', '=', 'meetingroom_id')
                         ->join('users', 'users.id', '=', 'client_id')
+                        ->leftJoin('sagetransactions', 'sagetransactions.booking_id', '=', 'bookings.id')
+                        ->where(DB::raw('bookings.deleted'), '=', 0)
+                        ->orderBy('date', 'desc')
                         ->get();
+
         $meetingrooms = MeetingRoom::orderBy('name')
                             ->where('status', '=', 1)
                             ->where('deleted', '=', 0)
@@ -53,9 +60,11 @@ class BookingController extends Controller
 
         $booking->free_of_charge = $payment_type === 2 ? 1 : 0;
         
-        $booking->payment_status = in_array($payment_type, [0,2]) ? 1 : 0;
+        $booking->payment_status = 0;
 
         $booking->total_amount = $request->get('total_amount');
+
+        $booking->deleted = $payment_type === 1 ? 1 : 0;
 
         $booking->save();
 
@@ -66,9 +75,10 @@ class BookingController extends Controller
                 'testMode' => env('SAGEPAY_TESTMODE'),
                 'encryptionKey' => env('SAGEPAY_KEY')               
             ]);
-            
-            $successUrl = url('/booking/'.$booking->id.'/success');
-            $failedUrl = url('/booking/'.$booking->id.'/failed');
+
+                       
+            $successUrl = url('/bookings/'.$booking->id.'/success');
+            $failedUrl = url('/bookings/'.$booking->id.'/failed');
 
             $params = [
                 
@@ -109,7 +119,27 @@ class BookingController extends Controller
 
             $request->session()->put('sagepay-method', $method);
             $request->session()->put('sagepay-url', $url);
-            $request->session()->put('sagepay-items', $hiddenFormItems);            
+            $request->session()->put('sagepay-items', $hiddenFormItems);
+
+            return response()->json(['url' => '/checkout/online-payment'], 200, [], JSON_NUMERIC_CHECK);
+
+        } else {
+
+            $t = new Sagetransaction;
+
+            $t->type = 1;
+            $t->booking_id = $booking->id;
+            $t->client_id = $booking->client_id;
+            $t->offline_notes = (string)$request->get('offline_notes');
+            $t->amount = $booking->total_amount;
+            $t->payment_type = $payment_type;
+
+            $t->save();
+
+            $booking->deleted = 0;
+            $booking->payment_status = 1;
+
+            $booking->save();
 
         }
 
@@ -123,6 +153,41 @@ class BookingController extends Controller
 
 
         return $this->get();
+
+    }
+
+    public function onlinePayment(Request $request) {
+
+        $data['method'] = $request->session()->get('sagepay-method');
+        $data['url'] = $request->session()->get('sagepay-url');
+        $data['items'] = $request->session()->get('sagepay-items');
+
+        return view('sagepay.form', $data);
+
+    }
+
+    public function success(Request $request, $booking_id) {
+
+        $gateway = OmniPay::create('SagePay\Form')->initialize([
+            'vendor' => env('SAGEPAY_VENDOR'),
+            'testMode' => env('SAGEPAY_TESTMODE'),
+            'encryptionKey' => env('SAGEPAY_KEY')
+        ]);  
+
+        $crypt = $request->get('crypt');
+
+        $booking = Booking::find($booking_id);
+
+        $response = $gateway->completePurchase(['crypt' => $crypt])->send();
+
+        $sage = new SageTransaction;
+
+        $sage->booking_id = $booking_id;
+        $sage->client_id = $booking->client_id;
+
+        $response->payment_type = 1;
+
+        $transactions = $sage->update_transactions($booking_id, $response, 'online');
 
     }
 }

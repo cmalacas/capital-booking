@@ -15,7 +15,9 @@
         "ignited/laravel-omnipay": "3.*",
         "laravel/framework": "^7.29",
         "laravel/tinker": "^2.5",
-        "laravel/ui": "^2.4"
+        "laravel/ui": "^2.4",
+        "omnipay/omnipay": "3.*",
+        "omnipay/sagepay": "^4.0"
     },
     "require-dev": {
         "facade/ignition": "^2.0",
