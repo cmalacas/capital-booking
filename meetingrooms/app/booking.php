@@ -8,7 +8,7 @@ class Booking extends Model
 {
     public function room() {
 
-        return $this->belongsTo('App\Meetingroom', 'meetingroom_id' );
+        return $this->belongsTo('App\MeetingRoom', 'meetingroom_id' );
 
     }
 }
