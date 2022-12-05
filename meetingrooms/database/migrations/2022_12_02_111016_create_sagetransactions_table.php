@@ -25,8 +25,8 @@ class CreateSagetransactionsTable extends Migration
             $table->text('offline_notes')->nullable();
             $table->smallInteger('payment_status')->default(0);
             $table->float('amount', 11, 2)->default(0);
-            $table->string('VendorTxtCode', 100)->nullable();
-            $table->string('VPSTxld', 100)->nullable();
+            $table->string('VendorTxCode', 100)->nullable();
+            $table->string('VPSTxId', 100)->nullable();
             $table->string('Status', 20)->nullable();
             $table->string('StatusDetail', 100)->nullable();
             $table->string('TxAuthNo', 20)->nullable();

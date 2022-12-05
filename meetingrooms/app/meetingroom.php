@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Meetingroom extends Model
+class MeetingRoom extends Model
 {
-    //
+    protected $table = 'meeting_rooms';
 }

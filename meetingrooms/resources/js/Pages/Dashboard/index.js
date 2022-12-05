@@ -38,6 +38,17 @@ export default class Dashboard extends Component {
     save(data) {
 
         Authservice.post('/dashboard/save', data)
+        .then( response => {
+
+            console.log('response', response);
+
+            if (response.url) {
+
+                location = response.url;
+
+            }
+
+        })
 
     }
 
