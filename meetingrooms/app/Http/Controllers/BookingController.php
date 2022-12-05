@@ -186,6 +186,8 @@ class BookingController extends Controller
 
         $crypt = $request->get('crypt');
 
+        print_r($request);
+
         $booking = Booking::find($booking_id);
 
         $response = $gateway->completePurchase(['crypt' => $crypt])->send();

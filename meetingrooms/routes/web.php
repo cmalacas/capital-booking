@@ -21,10 +21,18 @@ Route::group(['middleware' => 'auth:web'], function() {
         return view('welcome');
     }); 
 
+
     Route::get('/checkout/online-payment', 'BookingController@onlinePayment');
 
-    Route::get('/dashboard', function () {
-        return view('welcome');
+    Route::prefix('/dashboard')->group(function() {
+
+        Route::get('/', function () {
+            return view('welcome');
+        });
+
+        Route::post('/save', 'DashboardController@save');
+        Route::get('/{id}/success', 'DashboardController@success');
+
     });
 
     Route::get('/meetingrooms', function () {
