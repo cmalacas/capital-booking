@@ -13,7 +13,8 @@ export default class Login extends Component {
             email: '',
             password: '',
             errorEmail: false,
-            errorPassword: false
+            errorPassword: false,
+            errorLogin: false
 
         }
 
@@ -57,7 +58,7 @@ export default class Login extends Component {
 
                 } else {
 
-                    
+                    this.setState({ errorLogin: true });
 
                 }
 
@@ -73,11 +74,19 @@ export default class Login extends Component {
 
     change(e) {
 
-        this.setState({[e.target.name] : e.target.value, errorEmail: false, errorPassword: false});
+        this.setState({
+            [e.target.name] : e.target.value, 
+            errorEmail: false, 
+            errorPassword: false,
+            errorLogin: false
+        });
 
     }
 
     render() {
+
+        const founds = this.state.lookup ? <Found clients={ this.state.founds } select={this.selectClient} /> : '';
+
 
         return (
 
@@ -87,6 +96,14 @@ export default class Login extends Component {
                 
                     <div className="row justify-content-center mr-0 ml-0">
                         <div className="col-md-6 pt-4">
+
+                            { this.state.errorLogin ?
+
+                            <div className="pt-4 pb-4 text-center text-danger">
+                                Invalid login
+                            </div>
+
+                            : '' }
 
                             <div className="form-group row">
                                 <label className="col-md-4 col-form-label text-md-right">

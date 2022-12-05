@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Booking;
 use App\MeetingRoom;
+use App\User;
 
 use DB;
 use Omnipay\Omnipay;
@@ -14,6 +15,8 @@ use App\Sagetransaction;
 class BookingController extends Controller
 {
     public function get() {
+
+        $user = User::find(auth()->id());
 
         $bookings = Booking::select(
                             'bookings.*',
@@ -26,8 +29,15 @@ class BookingController extends Controller
                         ->join('users', 'users.id', '=', 'client_id')
                         ->leftJoin('sagetransactions', 'sagetransactions.booking_id', '=', 'bookings.id')
                         ->where(DB::raw('bookings.deleted'), '=', 0)
-                        ->orderBy('date', 'desc')
-                        ->get();
+                        ->orderBy('date', 'desc');
+
+        if ($user->type === 0) {
+
+            $booking = $bookings->where(DB::raw('bookings.client_id'), '=', $user->id);
+
+        }
+                        
+        $bookings = $bookings->get();
 
         $meetingrooms = MeetingRoom::orderBy('name')
                             ->where('status', '=', 1)
