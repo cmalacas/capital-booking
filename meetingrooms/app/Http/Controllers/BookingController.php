@@ -21,11 +21,11 @@ class BookingController extends Controller
         $bookings = Booking::select(
                             'bookings.*',
                             DB::raw('CONCAT(firstname, " ", lastname) as client_name'),
-                            DB::raw('meetingrooms.name as meeting_room_name'),
+                            DB::raw('meeting_rooms.name as meeting_room_name'),
                             DB::raw('IF(sagetransactions.payment_status = 1, "Success", "Pending") as payment_status_text'),
                             DB::raw('IF(date < NOW(), "Expired", "Not Expired") as expired_status_text')
                         )
-                        ->join('meetingrooms', 'meetingrooms.id', '=', 'meetingroom_id')
+                        ->join('meeting_rooms', 'meeting_rooms.id', '=', 'meetingroom_id')
                         ->join('users', 'users.id', '=', 'client_id')
                         ->leftJoin('sagetransactions', 'sagetransactions.booking_id', '=', 'bookings.id')
                         ->where(DB::raw('bookings.deleted'), '=', 0)
