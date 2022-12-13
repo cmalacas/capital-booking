@@ -15,6 +15,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus, faSave, faTrash, faEdit, faCheckCircle, faTruckMedical } from '@fortawesome/free-solid-svg-icons';
 
 import { formatter, format_date } from '../../components/Functions';
+
+import DatePicker from 'react-datepicker';
+
+import "react-datepicker/dist/react-datepicker.css";
 export default class Dashboard extends Component {
 
     constructor(props) {
@@ -232,6 +236,20 @@ class Add extends Component {
         this.amount = this.amount.bind(this);
         this.booking = this.booking.bind(this);
         this.getTotalAmount = this.getTotalAmount.bind(this);
+
+        this.selectDate = this.selectDate.bind(this);
+    }
+
+    selectDate(date) {
+
+        const day = date.getDate();
+        const mon = date.getMonth() + 1;
+        const year = date.getFullYear();
+        
+        const booking_date = `${year}-${mon}-${day}`;
+
+        this.setState({booking_date});
+
     }
 
     getTotalAmount() {
@@ -440,7 +458,7 @@ class Add extends Component {
                     <h4 className="text-white">{ formatter.format(room[0].amount_4) }</h4>
 
                 </Col>
-
+  
                 <Col md={3} className="text-white">
 
                     <Label>8 Hr:</Label>
@@ -458,7 +476,7 @@ class Add extends Component {
         const value = e.target.value;
 
 
-        
+
 
         this.setState( { search_client: value, lookup: true } , () => {
 
@@ -684,6 +702,16 @@ class Add extends Component {
 
     render() {
 
+        let booking_date = new Date();
+
+        if (this.state.booking_date) {
+
+            const dates = this.state.booking_date.split('-')
+
+            booking_date = new Date(dates[0], parseInt(dates[1]) - 1, dates[2], 0, 0);
+
+        }
+
         return (
 
             <Fragment>
@@ -731,13 +759,20 @@ class Add extends Component {
                                             onChange={this.change}
                                             className={this.state.errorBookingDate ? 'is-invalid' : '' }
                                         />
+                                        
+                                        <DatePicker 
+                                            selected={booking_date}
+                                            className="form-control"
+                                            onSelect={this.selectDate}
+                                            minDate={ new Date }
+                                        />
                                         { this.state.errorBookingDate ?
                                             <span className="d-block invalid-feedback" role="alert">
                                                 <strong>this is required</strong>
                                             </span>
                                         : '' }
                                     </Col>
-                                </FormGroup>
+                                </FormGroup> 
 
                                 { this.state.meeting_room_id > 0  ?
 
@@ -755,6 +790,16 @@ class Add extends Component {
                                             value={this.state.from_time}
                                             onChange={this.change}
                                             className={this.state.errorFromTime ? 'is-invalid' : '' }
+                                        />
+                                        <DatePicker
+                                            selected={booking_date}
+                                            onSelect={this.selectTime}
+                                            className="form-control"
+                                            showTimeSelect
+                                            showTimeSelectOnly
+                                            timeIntervals={15}
+                                            timeCaption="Time"
+                                            dateFormat="h:mm aa" 
                                         />
                                         { this.state.errorFromTime ?
                                             <span className="d-block invalid-feedback" role="alert">
