@@ -238,6 +238,18 @@ class Add extends Component {
         this.getTotalAmount = this.getTotalAmount.bind(this);
 
         this.selectDate = this.selectDate.bind(this);
+        this.selectTime = this.selectTime.bind(this);
+    }
+
+    selectTime(date) {
+
+        const hours = date.getHours();
+        const mins = date.getMinutes();
+
+        const from_time = `${hours < 10 ? '0' + hours : hours}:${mins < 10 ? '0' + mins : mins}`;
+
+        this.setState({ from_time}, () => this.getTotalAmount());
+
     }
 
     selectDate(date) {
@@ -248,7 +260,9 @@ class Add extends Component {
         
         const booking_date = `${year}-${mon}-${day}`;
 
-        this.setState({booking_date});
+        this.setState({booking_date}, () => {
+            this.getTotalAmount();
+        });
 
     }
 
@@ -704,11 +718,13 @@ class Add extends Component {
 
         let booking_date = new Date();
 
+        let times = this.state.from_time.split(':');
+
         if (this.state.booking_date) {
 
             const dates = this.state.booking_date.split('-')
 
-            booking_date = new Date(dates[0], parseInt(dates[1]) - 1, dates[2], 0, 0);
+            booking_date = new Date(dates[0], parseInt(dates[1]) - 1, dates[2], times[0], times[1]);
 
         }
 
@@ -752,13 +768,13 @@ class Add extends Component {
 
                                     <Col md={6}>
                                         <Label>Booking Date</Label>
-                                        <Input 
+                                        {/* <Input 
                                             type="date" 
                                             name="booking_date"
                                             value={this.state.booking_date}
                                             onChange={this.change}
                                             className={this.state.errorBookingDate ? 'is-invalid' : '' }
-                                        />
+                                        /> */}
                                         
                                         <DatePicker 
                                             selected={booking_date}
@@ -784,20 +800,24 @@ class Add extends Component {
                                 <FormGroup row>
                                     <Col md={6}>
                                         <Label>From Time</Label>
-                                        <Input 
+                                        {/* <Input 
                                             type="time" 
                                             name="from_time"
                                             value={this.state.from_time}
                                             onChange={this.change}
                                             className={this.state.errorFromTime ? 'is-invalid' : '' }
-                                        />
+                                        /> */}
                                         <DatePicker
                                             selected={booking_date}
-                                            onSelect={this.selectTime}
+                                            onChange={this.selectTime}
                                             className="form-control"
                                             showTimeSelect
                                             showTimeSelectOnly
                                             timeIntervals={15}
+                                            excludeTimes={[
+                                                setHours(setMinutes(new Date(), 0), 0),
+                                                setHours(setMinutes(new Date(), 15), 0),
+                                            ]}
                                             timeCaption="Time"
                                             dateFormat="h:mm aa" 
                                         />
@@ -833,9 +853,27 @@ class Add extends Component {
 
                                 { this.state.from_time.length > 0 && this.state.duration > 0 ? this.booking() : '' }
 
+
+                                <FormGroup row>
+
+                                    <Col>
+                                        <Input type="select" className="form-control" onChange={this.change} name="company">
+                                            <option value="">Select company</option>
+                                            <option value="CO">Capital Office</option>
+                                            <option value="YCF">Your Company Formation</option>
+                                        </Input>
+                                    </Col>
+
+                                    <Col>
+                                        <Input type="number" name="attendee" min="2" max="8" onChange={this.change} />
+                                    </Col>
+
+                                </FormGroup>
+
+                               
                                 <FormGroup>
                                     <Label>
-                                        Description
+                                        Additional Notes
                                     </Label>
                                     <Input
                                         type="textarea"
