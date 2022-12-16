@@ -43,6 +43,10 @@ class DashboardController extends Controller
 
         $booking->deleted = $payment_type === 1 ? 1 : 0;
 
+        $booking->attendee = $request->get('attendee');
+
+        $booking->company = $request->get('company');
+
         $booking->save();
 
         $meeting_room_name = $booking->room->name;

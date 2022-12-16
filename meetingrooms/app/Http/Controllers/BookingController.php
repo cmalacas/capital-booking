@@ -58,22 +58,14 @@ class BookingController extends Controller
         $booking->date = $request->get('booking_date');
         $booking->client_id = $request->get('client_id');
         $booking->meetingroom_id = $request->get('meeting_room_id');
-        $booking->from_time = $request->get('from_time');
-        
+        $booking->from_time = $request->get('from_time');        
         $booking->duration = $request->get('duration');
-
         $booking->to_time = (string)$request->get('to_time');
-
         $booking->description = $request->get('description');
-
         $payment_type = $request->get('payment_type');
-
-        $booking->free_of_charge = $payment_type === 2 ? 1 : 0;
-        
+        $booking->free_of_charge = $payment_type === 2 ? 1 : 0;        
         $booking->payment_status = 0;
-
         $booking->total_amount = $request->get('total_amount');
-
         $booking->deleted = $payment_type === 1 ? 1 : 0;
 
         $booking->save();

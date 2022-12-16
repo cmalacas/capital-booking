@@ -17,6 +17,8 @@ import { faPlus, faSave, faTrash, faEdit, faCheckCircle, faTruckMedical } from '
 import { formatter, format_date } from '../../components/Functions';
 
 import DatePicker from 'react-datepicker';
+import setHours from 'date-fns/setHours';
+import setMinutes from 'date-fns/setMinutes';
 
 import "react-datepicker/dist/react-datepicker.css";
 export default class Dashboard extends Component {
@@ -186,6 +188,8 @@ class Add extends Component {
 
         const user = props.user;
 
+        const _date = new Date();
+
         this.state = {
 
             open: false,
@@ -193,12 +197,14 @@ class Add extends Component {
             client_name: `${user.firstname} ${user.lastname}`,
             meeting_room_id: 0,
             meeting_room_name: '',
-            booking_date: '',
-            from_time : '09:00',
-            to_time: '11:00',
+            booking_date: `${_date.getFullYear()}-${_date.getMonth()}-${_date.getDate()}`,
+            from_time : '08:45',
+            to_time: '10:45',
             duration: 2,
             total_amount: 0,
             vat_amount: 0,
+            company: '',
+            attendee: 2,
             vat: 20,
             amount: 0,
             description: '',
@@ -217,12 +223,14 @@ class Add extends Component {
             offline_notes: '',
             lookup: false,
             founds: [],
+            valid: false,
             errorCardFirstName: false,
             errorCardLastName: false,
             errorCardCity: false,
             errorCardPostCode: false,
             errorCardAddress: false,
-            errorCardCountry: false
+            errorCardCountry: false,
+            errorCompany: false
             
         }
 
@@ -537,6 +545,7 @@ class Add extends Component {
         let errorCardPostCode = false;
         let errorCardAddress = false;
         let errorCardCountry = false;
+        let errorCompany = false;
         
         const {
                     client_id, 
@@ -555,7 +564,9 @@ class Add extends Component {
                     to_time,
                     total_amount,
                     meeting_room_name,
-                    offline_notes
+                    offline_notes,
+                    company,
+                    attendee
                 } = this.state;
 
         if (client_id === 0 || client_name === '') {
@@ -629,6 +640,13 @@ class Add extends Component {
             errorCardAddress = true;
 
         }
+
+        if (company === '') {
+
+            valid = false;
+            errorCompany = true;
+
+        }
        
 
         if (valid) {
@@ -650,7 +668,9 @@ class Add extends Component {
                             to_time,
                             total_amount,
                             meeting_room_name,
-                            offline_notes
+                            offline_notes,
+                            company,
+                            attendee
                         }
 
             this.setState({
@@ -674,7 +694,8 @@ class Add extends Component {
                 errorCardCity,
                 errorCardPostCode,
                 errorCardAddress,
-                errorCardCountry
+                errorCardCountry,
+                errorCompany
             })
 
         }
@@ -695,7 +716,8 @@ class Add extends Component {
             errorCardCity: false,
             errorCardPostCode: false,
             errorCardAddress: false,
-            errorCardCountry: false
+            errorCardCountry: false,
+            errorCompany: false
         }, 
             () => { this.getTotalAmount() }
         );
@@ -727,6 +749,31 @@ class Add extends Component {
             booking_date = new Date(dates[0], parseInt(dates[1]) - 1, dates[2], times[0], times[1]);
 
         }
+
+        const excludeTimes = [];
+
+        const hours = [0, 1, 2, 3, 4, 5, 6, 7, 8, 17, 18, 19, 20, 21, 22, 23];
+
+        hours.map( h => {
+
+            if ( h === 8) {
+
+                excludeTimes.push(setHours(setMinutes(new Date, 0), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 15), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 30), h));
+
+            } else {
+
+                excludeTimes.push(setHours(setMinutes(new Date, 0), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 15), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 30), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 45), h));
+
+            }
+
+        });
+
+        console.log('excludeTimes', excludeTimes);
 
         return (
 
@@ -814,10 +861,7 @@ class Add extends Component {
                                             showTimeSelect
                                             showTimeSelectOnly
                                             timeIntervals={15}
-                                            excludeTimes={[
-                                                setHours(setMinutes(new Date(), 0), 0),
-                                                setHours(setMinutes(new Date(), 15), 0),
-                                            ]}
+                                            excludeTimes={excludeTimes}
                                             timeCaption="Time"
                                             dateFormat="h:mm aa" 
                                         />
@@ -857,15 +901,32 @@ class Add extends Component {
                                 <FormGroup row>
 
                                     <Col>
-                                        <Input type="select" className="form-control" onChange={this.change} name="company">
+                                        <Input 
+                                            type="select" 
+                                            onChange={this.change} 
+                                            className={`form-control ${this.state.errorCompany ? 'is-invalid' : ''}`} 
+                                            name="company"
+                                        >
                                             <option value="">Select company</option>
                                             <option value="CO">Capital Office</option>
                                             <option value="YCF">Your Company Formation</option>
                                         </Input>
+                                        { this.state.errorCompany ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
                                     </Col>
 
                                     <Col>
-                                        <Input type="number" name="attendee" min="2" max="8" onChange={this.change} />
+                                        <Input 
+                                            type="number" 
+                                            name="attendee" 
+                                            min="2" 
+                                            max="8" 
+                                            onChange={this.change} 
+                                            value={this.state.attendee}
+                                        />
                                     </Col>
 
                                 </FormGroup>
@@ -879,7 +940,7 @@ class Add extends Component {
                                         type="textarea"
                                         name="description"
                                         value={this.state.description}
-                                        placeholder="Description" 
+                                        placeholder="Additional Notes" 
                                         onChange={this.change}
                                     />
                                 </FormGroup>
@@ -1085,7 +1146,11 @@ class Add extends Component {
                         </Row>
                     </ModalBody>
                     <ModalFooter>
-                        <Button onClick={this.save} color="success"><FontAwesomeIcon icon={faSave} /> Book</Button>
+                        { this.state.valid ?
+                            <Button onClick={this.save} color="success"><FontAwesomeIcon icon={faSave} /> Book</Button>
+
+                        : <Button color="secondary"><FontAwesomeIcon icon={faSave} />  Book</Button>
+                        }
                     </ModalFooter>
                 </Modal>
             </Fragment>
