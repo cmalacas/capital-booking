@@ -140,4 +140,25 @@ class DashboardController extends Controller
         return redirect('/dashboard');
 
     }
+
+    public function checkBooking(Request $request) {
+
+        $bookingDate = $request->get('booking_date');
+
+        $fromTime = $request->get('from_time');
+
+        $duration = $request->get('duration');
+
+        $meeting_room_id = $request->get('meeting_room_id');
+
+        $bookings = Booking::where('date', '=', $bookingDate)
+                            ->where('meetingroom_id', '=', $meeting_room_id)
+                            ->where('deleted', '=', 0)
+                            ->where('expired_status', '=', 0)
+                            ->get();
+
+
+        return response()->json(['bookings' => $bookings], 200, [], JSON_NUMERIC_CHECK);
+
+    }
 }

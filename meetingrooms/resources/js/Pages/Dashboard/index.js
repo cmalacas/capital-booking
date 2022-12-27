@@ -46,7 +46,7 @@ export default class Dashboard extends Component {
         Authservice.post('/dashboard/save', data)
         .then( response => {
 
-            console.log('response', response);
+            //console.log('response', response);
 
             if (response.url) {
 
@@ -114,6 +114,8 @@ export default class Dashboard extends Component {
 
             const end = new Date(dates[0], parseInt(dates[1]) - 1, dates[2], tos[0], tos[1]);
 
+            const title = <p>{b.meeting_room_name}</p>
+
             const desc = <Fragment>
                             <div>{b.client_name}</div>
                             <div>{b.meeting_room_name}</div>
@@ -122,7 +124,7 @@ export default class Dashboard extends Component {
 
             return {
 
-                'title' : '',
+                'title' : title,
                 'start' : start,
                 'end': end,
                 'allDay': false,
@@ -224,6 +226,7 @@ class Add extends Component {
             lookup: false,
             founds: [],
             valid: false,
+            validated: false,
             errorCardFirstName: false,
             errorCardLastName: false,
             errorCardCity: false,
@@ -276,15 +279,15 @@ class Add extends Component {
 
     getTotalAmount() {
 
-        const { meeting_room_id, duration } = this.state;
+        const { meeting_room_id, duration, booking_date, from_time } = this.state;
 
-        const from_time = this.state.from_time.split(':');
+        const _from_time = from_time.split(':');
 
         let total_amount = 0;
 
         let amount = 0;
 
-        let hour = parseInt(from_time[0]);
+        let hour = parseInt(_from_time[0]);
 
         let to_time = '';
 
@@ -320,15 +323,15 @@ class Add extends Component {
 
             if ( hour <= 9)  {
 
-                to_time = `0${hour}:${from_time[1]}`;
+                to_time = `0${hour}:${_from_time[1]}`;
             
             } else if (hour > 24) {
     
-                to_time = `0${hour - 24}:${from_time[1]}`;
+                to_time = `0${hour - 24}:${_from_time[1]}`;
     
             } else {
     
-                to_time = `${hour}:${from_time[1]}`;
+                to_time = `${hour}:${_from_time[1]}`;
     
             }
 
@@ -344,7 +347,26 @@ class Add extends Component {
             amount,
             to_time, 
             meeting_room_name 
-        })
+        }, () => {
+
+            if (amount > 0) {
+
+                Authservice.post('/dashboard/check-booking', {meeting_room_id, booking_date, from_time, to_time, duration})
+                .then(response => {
+
+                    if (response.bookings) {
+
+                        const bookings = response.bookings;
+
+                        this.setState({ valid: bookings.length === 0 ? true : false, validated: true });
+
+                    }
+
+                })
+
+            }
+
+        });
 
     }
 
@@ -738,6 +760,8 @@ class Add extends Component {
 
     render() {
 
+        console.log('state', this.state);
+
         let booking_date = new Date();
 
         let times = this.state.from_time.split(':');
@@ -772,8 +796,6 @@ class Add extends Component {
             }
 
         });
-
-        console.log('excludeTimes', excludeTimes);
 
         return (
 
@@ -896,6 +918,18 @@ class Add extends Component {
                                 </FormGroup>
 
                                 { this.state.from_time.length > 0 && this.state.duration > 0 ? this.booking() : '' }
+
+                                {
+                                    this.state.valid === false && this.state.meeting_room_id > 0 && this.state.validated ?
+
+                                        <Row className="bg bg-danger text-white mb-4 ml-0 mr-0">
+                                            <Col className="text-center p-2">
+                                                The <strong>{this.state.meeting_room_name}</strong> room is not available from <strong>{this.state.from_time}</strong> - <strong>{this.state.to_time}</strong> on <strong>{format_date(this.state.booking_date)}.</strong>
+                                            </Col>
+                                        </Row>
+
+                                    : ''
+                                }
 
 
                                 <FormGroup row>

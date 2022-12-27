@@ -12,14 +12,11 @@ class Authservice {
 
         } catch ( error ) {
 
-            console.log('error', error.response);
-
             return error.response.data;
 
         }
 
     }
-
     async getUserData(data) {
 
         try {

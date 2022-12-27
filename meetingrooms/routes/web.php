@@ -33,6 +33,8 @@ Route::group(['middleware' => 'auth:web'], function() {
         Route::post('/save', 'DashboardController@save');
         Route::get('/{id}/success', 'DashboardController@success');
 
+        Route::post('/check-booking', 'DashboardController@checkBooking');
+
     });
 
     Route::get('/meetingrooms', function () {
