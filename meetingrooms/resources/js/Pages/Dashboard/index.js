@@ -114,7 +114,7 @@ export default class Dashboard extends Component {
 
             const end = new Date(dates[0], parseInt(dates[1]) - 1, dates[2], tos[0], tos[1]);
 
-            const title = <p>{b.meeting_room_name}</p>
+            const title = <p>{b.client_name}<br />{b.meeting_room_name}<br />{froms[0]}:{froms[1]} - {tos[0]}:{tos[1]}<br />{b.duration} Hrs</p>
 
             const desc = <Fragment>
                             <div>{b.client_name}</div>
@@ -136,6 +136,8 @@ export default class Dashboard extends Component {
 
         });
 
+        const height = window.innerHeight - 200;
+
         return (
 
             <Fragment>
@@ -144,7 +146,7 @@ export default class Dashboard extends Component {
                     user={user}
                 />
 
-                <div className="container">
+                <div className="container mw-100">
                     <div className="row justify-content-center mr-0 ml-0">
                         <div className="col-md-12 pt-4">
 
@@ -167,7 +169,7 @@ export default class Dashboard extends Component {
                                 events={eventsList}
                                 startAccessor="start"
                                 endAccessor="end"
-                                style={{ height: 500 }}
+                                style={{ height }}
                             />
 
                         </div>
@@ -920,15 +922,35 @@ class Add extends Component {
                                 { this.state.from_time.length > 0 && this.state.duration > 0 ? this.booking() : '' }
 
                                 {
-                                    this.state.valid === false && this.state.meeting_room_id > 0 && this.state.validated ?
+                                    this.state.meeting_room_id > 0 ?
 
-                                        <Row className="bg bg-danger text-white mb-4 ml-0 mr-0">
-                                            <Col className="text-center p-2">
-                                                The <strong>{this.state.meeting_room_name}</strong> room is not available from <strong>{this.state.from_time}</strong> - <strong>{this.state.to_time}</strong> on <strong>{format_date(this.state.booking_date)}.</strong>
-                                            </Col>
-                                        </Row>
+                                        this.state.validated ?
+
+                                            this.state.valid ?
+
+                                            <Row className="bg bg-success text-white mb-4 ml-0 mr-0">
+                                                <Col className="text-center p-2">
+                                                The <strong>{this.state.meeting_room_name}</strong> room is available from <strong>{this.state.from_time}</strong> - <strong>{this.state.to_time}</strong> on <strong>{format_date(this.state.booking_date)}.</strong> Click Book Now to book this room.
+                                                </Col>
+                                            </Row>                                            
+
+
+                                            : 
+
+                                            <Row className="bg bg-danger text-white mb-4 ml-0 mr-0">
+                                                <Col className="text-center p-2">
+                                                    The <strong>{this.state.meeting_room_name}</strong> room is not available from <strong>{this.state.from_time}</strong> - <strong>{this.state.to_time}</strong> on <strong>{format_date(this.state.booking_date)}.</strong>
+                                                </Col>
+                                            </Row>    
+
+
+                                        : 
+
+                                        ''
+
 
                                     : ''
+                                    
                                 }
 
 

@@ -68,6 +68,10 @@ class BookingController extends Controller
         $booking->total_amount = $request->get('total_amount');
         $booking->deleted = $payment_type === 1 ? 1 : 0;
 
+        $booking->from_date = sprintf("%s %s", $request->get('booking_date'), $request->get('from_time'));
+
+        $booking->to_date = sprintf("%s %s", $request->get('booking_date'), $request->get('to_time'));
+
         $booking->save();
 
         if ($payment_type == 1) {

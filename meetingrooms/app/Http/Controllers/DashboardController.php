@@ -47,6 +47,11 @@ class DashboardController extends Controller
 
         $booking->company = $request->get('company');
 
+        $booking->from_date = sprintf("%s %s", $request->get('booking_date'), $request->get('from_time'));
+
+        $booking->to_date = sprintf("%s %s", $request->get('booking_date'), $request->get('to_time'));
+
+
         $booking->save();
 
         $meeting_room_name = $booking->room->name;
@@ -146,16 +151,29 @@ class DashboardController extends Controller
         $bookingDate = $request->get('booking_date');
 
         $fromTime = $request->get('from_time');
+        $toTime = $request->get('to_time');
+
+        $fromDate = sprintf("%s %s", $bookingDate, $fromTime);
+        $toDate = sprintf("%s %s", $bookingDate, $toTime);
 
         $duration = $request->get('duration');
 
         $meeting_room_id = $request->get('meeting_room_id');
 
-        $bookings = Booking::where('date', '=', $bookingDate)
-                            ->where('meetingroom_id', '=', $meeting_room_id)
-                            ->where('deleted', '=', 0)
-                            ->where('expired_status', '=', 0)
+        //DB::enableQueryLog();
+
+        $bookings = Booking::whereRaw("date = '$bookingDate' AND
+                                        meetingroom_id = $meeting_room_id AND
+                                        deleted = 0 AND
+                                        expired_status = 0 AND (
+                                            (from_date <= '$fromDate' AND to_date >= '$fromDate') OR
+                                            (from_date >= '$fromDate' AND from_date < '$toDate') OR
+                                            (from_date >= '$fromDate' AND to_date <= '$toDate')
+                                        )"
+                                    )
                             ->get();
+
+        //var_dump(DB::getQueryLog());
 
 
         return response()->json(['bookings' => $bookings], 200, [], JSON_NUMERIC_CHECK);
