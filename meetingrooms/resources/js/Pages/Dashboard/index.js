@@ -201,7 +201,7 @@ class Add extends Component {
             client_name: `${user.firstname} ${user.lastname}`,
             meeting_room_id: 0,
             meeting_room_name: '',
-            booking_date: `${_date.getFullYear()}-${_date.getMonth()}-${_date.getDate()}`,
+            booking_date: `${_date.getFullYear()}-${_date.getMonth() + 1}-${_date.getDate()}`,
             from_time : '08:45',
             to_time: '10:45',
             duration: 2,
@@ -261,7 +261,7 @@ class Add extends Component {
 
         const from_time = `${hours < 10 ? '0' + hours : hours}:${mins < 10 ? '0' + mins : mins}`;
 
-        this.setState({ from_time}, () => this.getTotalAmount());
+        this.setState({ from_time }, () => this.getTotalAmount());
 
     }
 
@@ -294,6 +294,9 @@ class Add extends Component {
         let to_time = '';
 
         let meeting_room_name = '';
+
+        let valid = true;
+        let validated = false;
 
         if (meeting_room_id > 0 && duration > 0) {
 
@@ -343,12 +346,21 @@ class Add extends Component {
 
         total_amount = amount + vat_amount;
 
+        if (hour >= 17) {
+
+            valid = false;
+            validated = true;
+
+        }
+
         this.setState({ 
             total_amount, 
             vat_amount,
             amount,
             to_time, 
-            meeting_room_name 
+            meeting_room_name,
+            valid,
+            validated
         }, () => {
 
             if (amount > 0) {
@@ -570,7 +582,7 @@ class Add extends Component {
         let errorCardAddress = false;
         let errorCardCountry = false;
         let errorCompany = false;
-        
+
         const {
                     client_id, 
                     client_name, 
@@ -592,6 +604,8 @@ class Add extends Component {
                     company,
                     attendee
                 } = this.state;
+
+        const toTime = to_time.split(':');
 
         if (client_id === 0 || client_name === '') {
 
@@ -618,6 +632,13 @@ class Add extends Component {
 
             valid = false;
             errorFromTime = true;
+
+        }
+
+        if (parseInt(toTime[0]) >= 17) {
+
+            valid = false;
+            errorDuration = true;
 
         }
 
@@ -761,8 +782,6 @@ class Add extends Component {
     }
 
     render() {
-
-        console.log('state', this.state);
 
         let booking_date = new Date();
 
@@ -913,7 +932,7 @@ class Add extends Component {
                                         </Input>
                                         { this.state.errorDuration ?
                                             <span className="d-block invalid-feedback" role="alert">
-                                                <strong>this is required</strong>
+                                                <strong>Duration is not valid. Meeting room start at 8:45 AM - 04:45 PM</strong>
                                             </span>
                                         : '' }
                                     </Col>

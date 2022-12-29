@@ -86,7 +86,7 @@ class DashboardController extends Controller
                     'billingCountry' => 'GB',
                 ],
 
-                'transactionId' => sprintf("CAPITAL-OFFICE-BOOKING-%s", $booking->id),
+                'transactionId' => sprintf("CAPITAL-OFFICE-BOOKING-%s-%s",  env('APP_ENV'), $booking->id),
                 
                 'amount' => number_format($booking->total_amount, 2, '.',''),
                 'currency' => 'GBP',
@@ -131,7 +131,7 @@ class DashboardController extends Controller
 
         $booking = Booking::find($booking_id);
 
-        $response = $gateway->completePurchase(['crypt' => $crypt, 'transactionId' => sprintf("CAPITAL-OFFICE-BOOKING-%s", $booking_id)])->send();
+        $response = $gateway->completePurchase(['crypt' => $crypt, 'transactionId' => sprintf("CAPITAL-OFFICE-BOOKING-%s-%s", env('APP_ENV'), $booking_id)])->send();
 
         $sage = new SageTransaction;
 
@@ -166,9 +166,9 @@ class DashboardController extends Controller
                                         meetingroom_id = $meeting_room_id AND
                                         deleted = 0 AND
                                         expired_status = 0 AND (
-                                            (from_date <= '$fromDate' AND to_date >= '$fromDate') OR
-                                            (from_date >= '$fromDate' AND from_date < '$toDate') OR
-                                            (from_date >= '$fromDate' AND to_date <= '$toDate')
+                                            ('$fromDate' >= from_date AND '$toDate' <= to_date) OR
+                                            ('$fromDate' < from_date AND '$toDate' < to_date) OR
+                                            ('$fromDate' > from_date  AND '$fromDate' < to_date AND to_date < '$toDate')
                                         )"
                                     )
                             ->get();
