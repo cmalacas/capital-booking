@@ -114,7 +114,7 @@ export default class Dashboard extends Component {
 
             const end = new Date(dates[0], parseInt(dates[1]) - 1, dates[2], tos[0], tos[1]);
 
-            const title = <p>{b.client_name}<br />{b.meeting_room_name}<br />{froms[0]}:{froms[1]} - {tos[0]}:{tos[1]}<br />{b.duration} Hrs</p>
+            const title = <p>{b.client_name}<br />{b.email}<br />{b.meeting_room_name}<br />{froms[0]}:{froms[1]} - {tos[0]}:{tos[1]}<br />{b.duration} Hrs</p>
 
             const desc = <Fragment>
                             <div>{b.client_name}</div>

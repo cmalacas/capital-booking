@@ -153,30 +153,41 @@ class DashboardController extends Controller
         $fromTime = $request->get('from_time');
         $toTime = $request->get('to_time');
 
-        $fromDate = sprintf("%s %s", $bookingDate, $fromTime);
-        $toDate = sprintf("%s %s", $bookingDate, $toTime);
-
         $duration = $request->get('duration');
 
-        $meeting_room_id = $request->get('meeting_room_id');
+        list($hours, $mins) = explode(':', $toTime);
 
-        //DB::enableQueryLog();
+        if ((int)$hours > 16) {
 
-        $bookings = Booking::whereRaw("date = '$bookingDate' AND
-                                        meetingroom_id = $meeting_room_id AND
-                                        deleted = 0 AND
-                                        expired_status = 0 AND (
-                                            ('$fromDate' >= from_date AND '$toDate' <= to_date) OR
-                                            ('$fromDate' < from_date AND '$toDate' < to_date) OR
-                                            ('$fromDate' > from_date  AND '$fromDate' < to_date AND to_date < '$toDate')
-                                        )"
-                                    )
-                            ->get();
+            return response()->json(['error' => 1], 200, [], JSON_NUMERIC_CHECK);
 
-        //var_dump(DB::getQueryLog());
+        } else {
+
+            $fromDate = sprintf("%s %s", $bookingDate, $fromTime);
+            $toDate = sprintf("%s %s", $bookingDate, $toTime);
+
+            
+            $meeting_room_id = $request->get('meeting_room_id');
+
+            //DB::enableQueryLog();
+
+            $bookings = Booking::whereRaw("date = '$bookingDate' AND
+                                            meetingroom_id = $meeting_room_id AND
+                                            deleted = 0 AND
+                                            expired_status = 0 AND (
+                                                ('$fromDate' >= from_date AND '$toDate' <= to_date) OR
+                                                ('$fromDate' < from_date AND '$toDate' < to_date) OR
+                                                ('$fromDate' > from_date  AND '$fromDate' < to_date AND to_date < '$toDate')
+                                            )"
+                                        )
+                                ->get();
+
+            //var_dump(DB::getQueryLog());
 
 
-        return response()->json(['bookings' => $bookings], 200, [], JSON_NUMERIC_CHECK);
+            return response()->json(['bookings' => $bookings], 200, [], JSON_NUMERIC_CHECK);
 
+
+        }
     }
 }

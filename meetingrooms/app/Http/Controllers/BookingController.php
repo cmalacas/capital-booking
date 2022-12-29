@@ -21,6 +21,7 @@ class BookingController extends Controller
         $bookings = Booking::select(
                             'bookings.*',
                             DB::raw('CONCAT(firstname, " ", lastname) as client_name'),
+                            DB::raw('email'),
                             DB::raw('meeting_rooms.name as meeting_room_name'),
                             DB::raw('IF(sagetransactions.payment_status = 1, "Success", "Pending") as payment_status_text'),
                             DB::raw('IF(date < NOW(), "Expired", "Not Expired") as expired_status_text')
