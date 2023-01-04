@@ -39,6 +39,31 @@ export default class Dashboard extends Component {
         this.getData = this.getData.bind(this);
         this.save = this.save.bind(this);
 
+        this.eventStyleGetter = this.eventStyleGetter.bind(this);
+
+    }
+
+    eventStyleGetter(event, start, end, isSelected) {
+
+        const data = event.data;
+
+        let backgroundColor = '#d30d5f';
+
+        if (data.company === 'CO') {
+
+            backgroundColor = '#1b9c9b';            
+
+        }
+
+        const style = {
+            backgroundColor,
+            maxHeight: '50px'
+        }
+
+        return {
+            style: style
+        }
+
     }
 
     save(data) {
@@ -170,6 +195,7 @@ export default class Dashboard extends Component {
                                 startAccessor="start"
                                 endAccessor="end"
                                 style={{ height }}
+                                eventPropGetter={(this.eventStyleGetter)}
                             />
 
                         </div>
