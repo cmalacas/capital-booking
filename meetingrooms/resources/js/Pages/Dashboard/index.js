@@ -57,7 +57,7 @@ export default class Dashboard extends Component {
 
         const style = {
             backgroundColor,
-            maxHeight: '50px'
+            
         }
 
         return {
