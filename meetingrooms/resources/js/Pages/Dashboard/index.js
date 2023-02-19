@@ -848,17 +848,23 @@ class Add extends Component {
         return (
 
             <Fragment>
-                <Button onClick={this.open} color="primary">Book A Meeting</Button>
+                <Button className="book-a-meeting-btn" onClick={this.open} color="primary">Book A Meeting</Button>
                 <Modal isOpen={this.state.open} toggle={this.close} className="mw-100 w-75">
-                    <ModalHeader>
-                        Book A Meeting
-                    </ModalHeader>
                     <ModalBody>
                         <Row>
-                            <Col md={6}>                               
+                            <Col md={6}>
+
+                                <h2>Book A Meeting</h2>
+
+                                <Row>
+                                    <Col><h4>Details</h4></Col>
+                                    <Col className="text-right">
+                                        <span className="info">info</span>
+                                    </Col>
+                                </Row>
 
                                 <FormGroup row>
-                                    <Col md={6}>
+                                    <Col>
                                         <Label>Meeting Room</Label>
                                         <Input 
                                             type="select" 
@@ -882,8 +888,11 @@ class Add extends Component {
                                             </span>
                                         : '' }
                                     </Col>
+                                </FormGroup>
 
-                                    <Col md={6}>
+                                <FormGroup row>
+
+                                    <Col md={8}>
                                         <Label>Booking Date</Label>
                                         {/* <Input 
                                             type="date" 
@@ -905,17 +914,7 @@ class Add extends Component {
                                             </span>
                                         : '' }
                                     </Col>
-                                </FormGroup> 
-
-                                { this.state.meeting_room_id > 0  ?
-
-                                    this.amount() 
-
-                                : ''  }
-
-
-                                <FormGroup row>
-                                    <Col md={6}>
+                                    <Col md={4}>
                                         <Label>From Time</Label>
                                         {/* <Input 
                                             type="time" 
@@ -941,8 +940,19 @@ class Add extends Component {
                                             </span>
                                         : '' }
                                     </Col>
+                                </FormGroup> 
 
-                                    <Col md={6}>
+                                { false && this.state.meeting_room_id > 0  ?
+
+                                    this.amount() 
+
+                                : ''  }
+
+
+                                <FormGroup row>
+                                    
+
+                                    <Col md={8}>
                                         <Label>Duration</Label>
                                         <Input 
                                             type="select" 
@@ -963,12 +973,70 @@ class Add extends Component {
                                             </span>
                                         : '' }
                                     </Col>
+
+                                    <Col>
+                                        <Label>Attendee</Label>
+                                        <Input 
+                                            type="number" 
+                                            name="attendee" 
+                                            min="2" 
+                                            max="8" 
+                                            onChange={this.change} 
+                                            value={this.state.attendee}
+                                        />
+                                    </Col>
+
                                 </FormGroup>
 
-                                { this.state.from_time.length > 0 && this.state.duration > 0 ? this.booking() : '' }
+                                
+
+
+                                <FormGroup row>
+
+                                    <Col>
+                                        <Label>Select company</Label>
+                                        <Input 
+                                            type="select" 
+                                            onChange={this.change} 
+                                            className={`form-control ${this.state.errorCompany ? 'is-invalid' : ''}`} 
+                                            name="company"
+                                        >
+                                            <option value="">Select company</option>
+                                            <option value="CO">Capital Office</option>
+                                            <option value="YCF">Your Company Formation</option>
+                                        </Input>
+                                        { this.state.errorCompany ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
+
+                                    
+
+                                </FormGroup>
+
+                               
+                                <FormGroup>
+                                    <Label>
+                                        Additional Notes
+                                    </Label>
+                                    <Input
+                                        type="textarea"
+                                        name="description"
+                                        value={this.state.description}
+                                        placeholder="Additional Notes" 
+                                        onChange={this.change}
+                                    />
+                                </FormGroup>
+                            </Col>
+
+                            <Col md={6}>
+
+                                { false && this.state.from_time.length > 0 && this.state.duration > 0 ? this.booking() : '' }
 
                                 {
-                                    this.state.meeting_room_id > 0 ?
+                                    false && this.state.meeting_room_id > 0 ?
 
                                         this.state.validated ?
 
@@ -999,101 +1067,45 @@ class Add extends Component {
                                     
                                 }
 
+                                    <div>
 
-                                <FormGroup row>
-
-                                    <Col>
-                                        <Input 
-                                            type="select" 
-                                            onChange={this.change} 
-                                            className={`form-control ${this.state.errorCompany ? 'is-invalid' : ''}`} 
-                                            name="company"
-                                        >
-                                            <option value="">Select company</option>
-                                            <option value="CO">Capital Office</option>
-                                            <option value="YCF">Your Company Formation</option>
-                                        </Input>
-                                        { this.state.errorCompany ?
-                                            <span className="d-block invalid-feedback" role="alert">
-                                                <strong>this is required</strong>
-                                            </span>
-                                        : '' }
-                                    </Col>
-
-                                    <Col>
-                                        <Input 
-                                            type="number" 
-                                            name="attendee" 
-                                            min="2" 
-                                            max="8" 
-                                            onChange={this.change} 
-                                            value={this.state.attendee}
-                                        />
-                                    </Col>
-
-                                </FormGroup>
-
-                               
-                                <FormGroup>
-                                    <Label>
-                                        Additional Notes
-                                    </Label>
-                                    <Input
-                                        type="textarea"
-                                        name="description"
-                                        value={this.state.description}
-                                        placeholder="Additional Notes" 
-                                        onChange={this.change}
-                                    />
-                                </FormGroup>
-                            </Col>
-
-                            <Col md={6}>
-
-                                    <div className="border p-3">
-
-                                        { this.state.meeting_room_id > 0 ?
+                                        
 
                                         <Fragment>
 
-                                            <h5>Transaction</h5>
+                                            <div className="d-block text-right">
+                                                <Button onClick={ this.close } className="close"><img src="/images/Close.svg" /></Button>
+                                            </div>
+
+                                            <h4>Meeting Details</h4>
 
                                             <Table className="mb-4">
-                                                <thead>
-                                                    <tr>
-                                                        <th>
-                                                            Meeting Details
-                                                        </th>
-                                                        <th>
-                                                            Amount
-                                                        </th>
-                                                    </tr>
-                                                </thead>
+                                                
                                                 <tbody>
                                                     <tr>
-                                                        <td>
-                                                            Room: { this.state.meeting_room_name}<br />
-                                                            Date: { format_date(this.state.booking_date) }<br />
-                                                            Hrs: { this.state.duration }<br />
-                                                            Time: { this.state.from_time } - { this.state.to_time }
+                                                        <td className="p-0">
+                                                            { this.state.meeting_room_id > 0 ? this.state.meeting_room_name : 'Room' }<br />
+                                                            { this.state.meeting_room_id > 0 ? format_date(this.state.booking_date) : 'Date' }<br />
+                                                            { this.state.meeting_room_id > 0 ? <span className="hours">{this.state.duration} hours</span> : 'hours' }<br />
+                                                            { this.state.meeting_room_id > 0 ? `${this.state.from_time} - ${this.state.to_time}` : 'time' }
                                                         </td>
-                                                        <td>
+                                                        <td className="p-0">
                                                             { formatter.format(this.state.amount) }
                                                         </td>
                                                     </tr>                                                    
                                                 </tbody>
                                                 <tfoot>
                                                     <tr>
-                                                        <td>
-                                                            VAT (20%)
+                                                        <td className="pl-0 pr-0">
+                                                            <span className="vat">VAT (20%)</span>
                                                         </td>
-                                                        <td>
+                                                        <td className="pl-0 pr-0">
                                                             { formatter.format(this.state.vat_amount) }
                                                         </td>
                                                     </tr>
-                                                    <tr style={{ borderBottom: 'solid #dee2e6 2px' }}>
-                                                        <td>Amount: </td>
-                                                        <td>
+                                                    <tr>
+                                                        <td className="p-0">Total Amount: </td>
+                                                        <td className="p-0">
                                                             { formatter.format(this.state.total_amount) }
                                                         </td>
                                                     </tr>
@@ -1102,14 +1114,14 @@ class Add extends Component {
 
                                         </Fragment>
 
-                                        : '' }
+                                       
 
 
-                                        <FormGroup>
+                                      
 
-                                            <h5>Payment</h5>
+                                        <h4>Payment Details</h4>
 
-                                        </FormGroup>
+                                        <div className="payment-details">
 
                                         <FormGroup row>
 
@@ -1239,21 +1251,29 @@ class Add extends Component {
 
                                         </FormGroup>
 
+                                        </div>
+
 
 
                                     </div>
+
+                                    <Row>
+                                        <Col className="text-right">
+                                        { this.state.valid ?
+                                            <Button onClick={this.save} color="primary">Book a meeting</Button>
+
+                                        : <Button color="secondary">Book a meeting</Button>
+                                        }
+                                        </Col>
+                                    </Row>
 
                                 
                             </Col>
                         </Row>
                     </ModalBody>
-                    <ModalFooter>
-                        { this.state.valid ?
-                            <Button onClick={this.save} color="success"><FontAwesomeIcon icon={faSave} /> Book</Button>
-
-                        : <Button color="secondary"><FontAwesomeIcon icon={faSave} />  Book</Button>
-                        }
-                    </ModalFooter>
+                    {/* <ModalFooter>
+                        
+                    </ModalFooter> */}
                 </Modal>
             </Fragment>
 

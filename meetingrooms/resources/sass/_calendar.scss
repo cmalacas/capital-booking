@@ -1,3 +1,7 @@
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
 .rbc-calendar {
 
   font-family: 'Poppins', sans-serif;
@@ -94,4 +98,127 @@
     }
   }
 
+}
+
+.btn {
+
+  font-size: 18px;
+  line-height: 27px;
+  border-radius: 30px;
+  height: 48px;
+  width: 226px;
+
+  &-primary {    
+    background: #189c9b;
+    border-radius: 30px;
+    border: solid 1px #189c9b;
+    
+
+    &:not(:disabled):not(.disabled):active,
+    &:active,
+    &:hover {
+      background: #189c9b;
+      border: solid 1px #189c9b;
+    }
+
+    &:focus {
+      background: #189c9b;
+      border: solid 1px #189c9b;
+      box-shadow: 0 0 0 0.2rem rgb(24 156 165 / 50%);
+    }
+  }
+
+  &.close {
+    background: #fff;
+    height: 48px;
+    width: 48px;
+    float: none;
+    opacity: 1;
+  }
+}
+
+.modal-dialog {
+  
+  .modal-content {
+    border-radius: 32px;
+    overflow: hidden;
+
+    .modal-body {
+      padding: 0;
+      font-size: 16px;
+
+      & > .row {
+
+        & > .col-md-6 {
+
+          padding: 60px;
+
+          & + .col-md-6 {
+            background: #eff8f8;
+            border-radius: 32px;
+          }
+        } 
+      }
+
+      h2 {
+        margin-bottom: 48px;  
+        font-size: 32px;
+        line-height: 1.5;
+      }
+
+      h4 {
+        font-size: 20px;
+        line-height: 1.5;
+        margin-bottom: 32px;
+      }
+
+      label {
+        font-size: 14px;
+        line-height: 1.4;
+        color: #7d8a96;
+        font-weight: 300;
+        letter-spacing: 1;
+        margin-bottom: 6px;
+      }
+
+      .info {
+        color: #1b9c9b;   
+        font-size: 16px;     
+        padding-left: 30px;        
+        background:url('/images/Rectangle.svg') no-repeat 0;
+        background-size: 26px 26px;
+      }
+
+      .form-control {
+        font-size: 16px;
+        padding: 14px 18px;
+        height: auto;
+        border-radius: 8px;
+        border: solid 1px #d2d5dd;
+      }
+
+      .table {
+        td {
+          border-top: 1px solid transparent;
+        }
+      }
+
+      .payment-details {
+
+        margin-bottom: 30px;
+        
+        .form-control {
+          border: solid 1px #fff;
+        }
+      }
+
+      .vat {
+        color: #7d8a96;
+      }
+
+      .hours {
+        color: #1b9c9b;
+      }
+    }
+  }
 }
