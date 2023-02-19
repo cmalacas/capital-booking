@@ -195,6 +195,7 @@ export default class Dashboard extends Component {
                                 startAccessor="start"
                                 endAccessor="end"
                                 style={{ height }}
+                                views={{ month: true, week: true }}
                                 eventPropGetter={(this.eventStyleGetter)}
                             />
 

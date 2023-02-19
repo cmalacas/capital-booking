@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Nunito);
+@import url(https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800&display=swap);
 @charset "UTF-8";
 /*!
  * Bootstrap v4.6.2 (https://getbootstrap.com/)
@@ -9905,4 +9905,68 @@ button.rbc-input::-moz-focus-inner {
   height: 1px;
   background-color: #74ad31;
   pointer-events: none;
+}
+
+.rbc-calendar {
+  font-family: "Poppins", sans-serif;
+}
+.rbc-calendar .rbc-toolbar .rbc-toolbar-label {
+  font-size: 24px;
+  line-height: 36px;
+  font-weight: 600;
+  color: #010101;
+}
+.rbc-calendar .rbc-month-view {
+  border: solid 1px #e6ecf3;
+  border-radius: 8px;
+}
+.rbc-calendar .rbc-header {
+  padding-top: 17px;
+  padding-bottom: 17px;
+  font-size: 16px;
+  color: #010101;
+  border-left: 0;
+  font-weight: 400;
+  border-bottom: 1px solid #e6ecf3;
+}
+.rbc-calendar .rbc-day-bg + .rbc-day-bg {
+  border-left: 1px solid #e6ecf3;
+}
+.rbc-calendar .rbc-month-row + .rbc-month-row {
+  border-top: solid 1px #e6ecf3;
+}
+.rbc-calendar .rbc-off-range-bg {
+  background: #fff;
+}
+.rbc-calendar .rbc-button-link {
+  color: #010101;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+.rbc-calendar .rbc-off-range .rbc-button-link {
+  color: #bec6cd;
+}
+.rbc-calendar .rbc-btn-group {
+  border-radius: 58px;
+  background: #eff8f8;
+  font-size: 16px;
+  width: 189px;
+  height: 48px;
+}
+.rbc-calendar .rbc-btn-group button {
+  border-radius: 50px;
+  border-color: transparent;
+  width: 95px;
+  height: 36px;
+  margin-top: 6px;
+  border-top-right-radius: 50px;
+  border-bottom-right-radius: 50px;
+}
+.rbc-calendar .rbc-btn-group button:first-child {
+  margin-left: 8px;
+}
+.rbc-calendar .rbc-btn-group button.rbc-active {
+  background: white;
+  box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.08);
 }
