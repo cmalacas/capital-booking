@@ -20,6 +20,8 @@ class BookingController extends Controller
 
         $bookings = Booking::select(
                             'bookings.*',
+                            DB::raw('TIME_FORMAT(from_time, "%h:%i %p") as _from_time'),
+                            DB::raw('TIME_FORMAT(to_time, "%h:%i %p") as _to_time'),
                             DB::raw('CONCAT(firstname, " ", lastname) as client_name'),
                             DB::raw('email'),
                             DB::raw('meeting_rooms.name as meeting_room_name'),

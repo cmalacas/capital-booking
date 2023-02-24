@@ -1,10 +1,118 @@
 body {
   font-family: 'Poppins', sans-serif;
+  background-color: #fff;
+}
+
+.navbar-nav {
+  position: relative;
 }
 
 .rbc-calendar {
 
   font-family: 'Poppins', sans-serif;
+
+  .rbc-date-cell {
+    padding-right: 16px;
+    padding-top: 16px;
+
+    &.rbc-now {
+
+      button {
+
+        background: #1b9c9b;
+        color: #fff;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+
+      }
+
+    }
+  }
+
+  .rbc-event {
+    padding: 0px;
+    position: relative;
+
+    &:focus {
+      outline: none;
+    }
+
+    .event-normal {
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .event-selected {
+      position: absolute;
+      background: #fff;
+      padding: 25px;
+      width: 327px;
+      display: none;
+      top: -23px;
+      right: -300px;
+      box-shadow: 0 0 10px 0px rgba(0,0,0,0.1);
+      z-index: 1;
+      border-radius: 8px;
+
+      .client-name,
+      .meeting-room,
+      .from-to-time {
+        padding-left: 50px;
+        margin-bottom: 15px;
+        color: #010101;
+      }
+
+      .client-name {
+        font-weight: 500;
+        position: relative;
+
+        &:after {
+          content: '';
+          display: block;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #dde0ff;
+          position: absolute;
+          top: 7px;
+          left: 20px;
+        }
+      }
+
+      .meeting-room {
+        background:url('/images/room.svg') no-repeat 10px -3px;
+      }
+
+      .from-to-time {
+        background:url('/images/time.svg') no-repeat 10px -3px;
+      }
+
+    }
+
+    &.rbc-selected {
+
+      .event-normal {
+        border: solid 1px #4844fb;
+      }
+
+      .event-selected {
+        display: block;
+      }
+    }
+  }
+
+  .client-name {
+    display: block;
+    font-size: 16px;
+    line-height: 1.5;
+    font-weight: 500;
+    color: #010101;
+  }
+
+  .from-to {
+    display: block;
+  }
 
   .rbc-toolbar {
 
@@ -73,7 +181,6 @@ body {
     border-radius: 58px;
     background: #eff8f8;
     font-size: 16px;
-    width: 189px;
     height: 48px;
 
     button {
@@ -83,17 +190,77 @@ body {
       width: 95px;
       height: 36px;
       margin-top: 6px;
-      border-top-right-radius: 50px;
-      border-bottom-right-radius: 50px;
+      border-top-right-radius: 50px !important;
+      border-bottom-right-radius: 50px !important;
+      border-top-left-radius: 50px !important;
+      border-bottom-left-radius: 50px !important;
       
       &:first-child {
         margin-left: 8px;
       }
 
-      &.rbc-active {
-        background: #ffff;
-        box-shadow: 0px 0px 8px rgba(0,0,0,0.08);
-        
+     
+    }
+  }
+
+  .rbc-toolbar {
+
+    .label {
+
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0 18px;
+      width: 200px;
+      text-align: center;
+
+      b {
+        font-weight: 600;
+      }
+
+    }
+
+    button {
+      background: #189c9b;
+      border: solid 1px #189c9b;
+      border-radius: 30px;
+      padding: 0;
+      color: #fff;
+
+      &.btn {
+        &-today {
+          background:transparent;
+          border: solid 1px #fff;
+          color: #010101;
+        }
+
+        &.back,
+        &.next {
+          background: #eef8f8;
+          border: solid 1px #eef8f8;
+        }        
+      }
+    }
+
+    .btn {
+      &-view {
+
+        button {
+          color: #889b9d;
+          font-size: 16px;
+          font-weight: 400;
+          background: transparent;
+          border-color: transparent;
+          box-shadow: none;
+
+          & + button {
+            margin-right: 8px;
+          }
+
+          &.rbc-active {
+            background: #ffff;
+            box-shadow: 0px 0px 8px rgba(0,0,0,0.08);
+          }
+        }
       }
     }
   }
@@ -108,10 +275,33 @@ body {
   height: 48px;
   width: 226px;
 
+  &-today {
+    height: auto;
+    width: auto;
+    padding: 0;
+    border-color: transparent;
+    line-height: 1.5;
+    font-size: 18px;
+  }
+
+  &.back,
+  &.next {
+    width: 28px;
+    height: 28px;
+    border-radius: 16px;
+    background: #eef8f8;
+    border: solid 1px #eef8f8;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    margin: 3px 0 0;
+  }
+
   &-primary {    
     background: #189c9b;
     border-radius: 30px;
     border: solid 1px #189c9b;
+    color: #fff;
     
 
     &:not(:disabled):not(.disabled):active,
@@ -137,8 +327,9 @@ body {
   }
 }
 
+
 .modal-dialog {
-  
+
   .modal-content {
     border-radius: 32px;
     overflow: hidden;
@@ -218,6 +409,54 @@ body {
 
       .hours {
         color: #1b9c9b;
+      }
+    }
+  }
+
+  &.single-event {
+    .modal-content {
+      border-radius: 0;
+      padding: 25px;
+      font-size: 16px;
+
+      .event-client-name {
+        font-weight: 500;
+        padding-left: 50px;
+        position: relative;
+        margin-bottom: 15px;
+
+        &:after {
+          content: '';
+          display: block;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #dde0ff;
+          position: absolute;
+          top: 7px;
+          left: 20px;
+        }
+      }
+
+      .event-meeting-room {
+        padding-left: 50px;
+        background:url('/images/room.svg') no-repeat 10px -3px;
+        margin-bottom: 15px;
+      }
+
+      .event-time {
+        padding-left: 50px;
+        background:url('/images/time.svg') no-repeat 10px -3px;
+        margin-bottom: 15px;
+      }
+
+      .btn {
+        width: auto;
+        height: auto;
+        background: transparent;
+        border: 1px solid transparent;
+        padding:0;
+        line-height: 1;
       }
     }
   }

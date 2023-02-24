@@ -1,14 +1,15 @@
-import React, {Component, Fragment} from 'react';
+import React, {Component, Fragment, useMemo} from 'react';
 
 import Navigation from '../../components/layouts/navigation';
 
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
+
 import Authservice from '../../components/Authservice';
 
 const localizer = momentLocalizer(moment);
 
-import { Row, Col, Button, Modal, ModalHeader, ModalBody, ModalFooter, FormGroup, Input, Label, Table } from 'reactstrap';
+import { Row, Col, Button, Modal, ModalHeader, ModalBody, ModalFooter, FormGroup, Input, Label, Table, ButtonGroup } from 'reactstrap';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -21,6 +22,7 @@ import setHours from 'date-fns/setHours';
 import setMinutes from 'date-fns/setMinutes';
 
 import "react-datepicker/dist/react-datepicker.css";
+
 export default class Dashboard extends Component {
 
     constructor(props) {
@@ -29,9 +31,13 @@ export default class Dashboard extends Component {
 
         this.state = {
 
-            user: {id: 0 },
+            user: { id: 0 },
             bookings: [],
-            meetingrooms: []
+            meetingrooms: [],
+            view: 'month',
+            open: false,
+
+            event: { client_name: '', meeting_room_name: '', _from_time: '', _to_time: '' },
 
         }
 
@@ -40,24 +46,127 @@ export default class Dashboard extends Component {
         this.save = this.save.bind(this);
 
         this.eventStyleGetter = this.eventStyleGetter.bind(this);
+        this.CustomToolbar = this.CustomToolbar.bind(this);
+        this.event = this.event.bind(this);
+        this.eventSelect = this.eventSelect.bind(this);
+
+        this.close = this.close.bind(this);
 
     }
+
+    close() {
+
+        this.setState({ open: false });
+
+    }
+
+    eventSelect( event ) {
+
+        /* this.setState({
+            open: true, 
+            event: event.data
+        }); */
+
+    }
+
+    event( event )  {
+
+        const desc = event.event.desc;
+        return <span>{ desc }</span>
+
+    }
+
+    CustomToolbar(toolbar) {
+
+        const goToWeekView = () => {
+            toolbar.onView('week');
+            this.setState({ view: 'week' })
+        }
+            
+        const goToMonthView = () => {
+            toolbar.onView('month');
+            this.setState({ view: 'month' })
+        }   
+    
+        const goToBack = () => {
+          toolbar.date.setMonth(toolbar.date.getMonth() - 1);
+          toolbar.onNavigate('prev');
+        };
+      
+        const goToNext = () => {
+          toolbar.date.setMonth(toolbar.date.getMonth() + 1);
+          toolbar.onNavigate('next');
+        };
+      
+        const goToCurrent = () => {
+          const now = new Date();
+          toolbar.date.setMonth(now.getMonth());
+          toolbar.date.setYear(now.getFullYear());
+          toolbar.onNavigate('current');
+        };
+      
+        const label = () => {
+          const date = moment(toolbar.date);
+          return (
+            <span><b>{date.format('MMMM')}</b><span> {date.format('YYYY')}</span></span>
+          );
+        };
+      
+        return (
+          <Row className="rbc-toolbar">
+            <Col md={2}>
+                <div className="rbc-btn-group btn-view">
+                    <button className={`${this.state.view === 'month' ? "rbc-active" : ""}`} onClick={goToMonthView}>
+                        <span className="label-filter-off">Month</span>
+                    </button>
+                    <button className={`${this.state.view === 'week' ? "rbc-active" : ""}`} onClick={goToWeekView}>
+                        <span className="label-filter-off">Week</span>
+                    </button>
+                </div>
+            </Col>
+            <Col md={8}>
+                <Row>
+                    <Col className="text-center">
+                        <button className="btn btn-today" onClick={goToCurrent}>Today</button>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col className="d-flex justify-content-center">
+                        <button className="btn back" onClick={goToBack}><img src="/images/back.svg" /></button>
+                        <label className="label">{label()}</label>
+                        <button className="btn next" onClick={goToNext}><img src="/images/next.svg" /></button>    
+                    </Col>
+                </Row>
+            </Col>
+            <Col md={2}>
+                <Add 
+                    user={ this.state.user }
+                    meetingrooms={ this.state.meetingrooms }
+                    save={ this.save }
+                />
+            </Col>
+                
+          </Row>
+        );
+      };
 
     eventStyleGetter(event, start, end, isSelected) {
 
         const data = event.data;
 
-        let backgroundColor = '#d30d5f';
+        let backgroundColor = '#d0f7f0';
+        let color = '#2faaa9';
 
         if (data.company === 'CO') {
 
-            backgroundColor = '#1b9c9b';            
+            backgroundColor = '#bce5ff'; 
+            color = '#10a1ff';           
 
         }
 
         const style = {
-            backgroundColor,
-            
+            backgroundColor,            
+            color
         }
 
         return {
@@ -139,12 +248,20 @@ export default class Dashboard extends Component {
 
             const end = new Date(dates[0], parseInt(dates[1]) - 1, dates[2], tos[0], tos[1]);
 
-            const title = <p>{b.client_name}<br />{b.email}<br />{b.meeting_room_name}<br />{froms[0]}:{froms[1]} - {tos[0]}:{tos[1]}<br />{b.duration} Hrs</p>
+            //const title = <p><span className="client-name">{b.client_name}</span><span className="from-to">{froms[0]}:{froms[1]} - {tos[0]}:{tos[1]}</span></p>
+
+            const title = `${b.client_name} ${froms[0]}:${froms[1]} - ${tos[0]}:${tos[1]}`;
 
             const desc = <Fragment>
-                            <div>{b.client_name}</div>
-                            <div>{b.meeting_room_name}</div>
-                            <div>{b.date} {b.from_time} {b.to_time}</div>
+                            <div className="event-normal">
+                                <div className="client-name d-block">{b.client_name}</div>                            
+                                <div className="from-to-time d-block">{b._from_time} - {b._to_time}</div>
+                            </div>
+                            <div className="event-selected">
+                                <div className="client-name d-block">{b.client_name}</div>                            
+                                <div className="meeting-room d-block">{b.meeting_room_name}</div>
+                                <div className="from-to-time d-block">{b._from_time} - {b._to_time}</div>
+                            </div>
                          </Fragment>
 
             return {
@@ -163,6 +280,17 @@ export default class Dashboard extends Component {
 
         const height = window.innerHeight - 200;
 
+        /* const formats = useMemo(() => ({
+            dateFormat: 'dd',
+          
+            dayFormat: (date, format, localizer) =>
+              localizer.format(date, 'DDD', culture),
+          
+            dayRangeHeaderFormat: ({ start, end }, culture, localizer) =>
+              localizer.format(start, { date: 'short' }, culture) + ' — ' +
+              localizer.format(end, { date: 'short' }, culture)
+          }), []) */
+
         return (
 
             <Fragment>
@@ -174,20 +302,7 @@ export default class Dashboard extends Component {
                 <div className="container mw-100">
                     <div className="row justify-content-center mr-0 ml-0">
                         <div className="col-md-12 pt-4">
-
-                            { user.type === 0 ?
-
-                                <Row className="mb-2">
-                                    <Col className="text-right">
-                                        <Add 
-                                            user={user}
-                                            save={this.save}
-                                            meetingrooms={this.state.meetingrooms}
-                                        />
-                                    </Col>
-                                </Row>
-
-                            : '' }
+                           
 
                             <Calendar
                                 localizer={localizer}
@@ -196,12 +311,44 @@ export default class Dashboard extends Component {
                                 endAccessor="end"
                                 style={{ height }}
                                 views={{ month: true, week: true }}
+                                onSelectEvent={ this.eventSelect }
+                                components={
+                                    {
+                                        toolbar: this.CustomToolbar,
+                                        event: this.event
+                                    }
+                                }
                                 eventPropGetter={(this.eventStyleGetter)}
                             />
 
                         </div>
                     </div>
                 </div>
+
+                <Modal isOpen={this.state.open} toggle={ this.close} className="single-event" style={{ width: '327px', borderRadius: '0' }}>
+
+                    <ModalBody>
+                        <Row>
+                            <Col md={10} className="event-client-name">
+                                { this.state.event.client_name }
+                            </Col>
+                            <Col md={2} className="icons">
+                                <Button onClick={ this.close }><img src="/images/x.svg" /></Button>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col className="event-meeting-room">
+                                { this.state.event.meeting_room_name }
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col className="event-time">
+                                { this.state.event._from_time} - { this.state.event._to_time }
+                            </Col>
+                        </Row>
+                    </ModalBody>
+
+                </Modal>
 
             </Fragment>
 
@@ -279,6 +426,26 @@ class Add extends Component {
 
         this.selectDate = this.selectDate.bind(this);
         this.selectTime = this.selectTime.bind(this);
+    }
+
+    componentDidUpdate() {
+
+        if ( this.props.user.id != this.state.client_id ) {
+
+            const user = this.props.user;
+
+            const client_id = user.id;
+
+            const client_name = `${user.firstname} ${user.lastname}`;
+
+            const card_first_name = user.firstname;
+
+            const card_last_name = user.lastname;
+
+            this.setState( { client_id, client_name, card_first_name, card_last_name });
+
+        }
+
     }
 
     selectTime(date) {
@@ -776,6 +943,8 @@ class Add extends Component {
 
     change(e) {
 
+        const targetName = e.target.name;
+
         this.setState({
             [e.target.name] : e.target.value,
             errorClientName: false,
@@ -791,7 +960,15 @@ class Add extends Component {
             errorCardCountry: false,
             errorCompany: false
         }, 
-            () => { this.getTotalAmount() }
+            () => { 
+
+                if (targetName === 'meeting_room_id' ||
+                    targetName === 'duration') {
+                
+                    this.getTotalAmount() 
+
+                }
+            }
         );
 
     }
@@ -844,7 +1021,7 @@ class Add extends Component {
             }
 
         });
-
+        
         return (
 
             <Fragment>
@@ -1029,14 +1206,9 @@ class Add extends Component {
                                         onChange={this.change}
                                     />
                                 </FormGroup>
-                            </Col>
-
-                            <Col md={6}>
-
-                                { false && this.state.from_time.length > 0 && this.state.duration > 0 ? this.booking() : '' }
 
                                 {
-                                    false && this.state.meeting_room_id > 0 ?
+                                    this.state.meeting_room_id > 0 ?
 
                                         this.state.validated ?
 
@@ -1044,7 +1216,7 @@ class Add extends Component {
 
                                             <Row className="bg bg-success text-white mb-4 ml-0 mr-0">
                                                 <Col className="text-center p-2">
-                                                The <strong>{this.state.meeting_room_name}</strong> room is available from <strong>{this.state.from_time}</strong> - <strong>{this.state.to_time}</strong> on <strong>{format_date(this.state.booking_date)}.</strong> Click Book Now to book this room.
+                                                The <strong>{this.state.meeting_room_name}</strong> room is available from <strong>{this.state.from_time}</strong> - <strong>{this.state.to_time}</strong> on <strong>{format_date(this.state.booking_date)}.</strong> Click Book a meeting to book this room.
                                                 </Col>
                                             </Row>                                            
 
@@ -1066,6 +1238,13 @@ class Add extends Component {
                                     : ''
                                     
                                 }
+                            </Col>
+
+                            <Col md={6}>
+
+                                { false && this.state.from_time.length > 0 && this.state.duration > 0 ? this.booking() : '' }
+
+                                
 
                                     <div>
 
@@ -1078,6 +1257,8 @@ class Add extends Component {
                                             </div>
 
                                             <h4>Meeting Details</h4>
+
+                                            
 
                                             <Table className="mb-4">
                                                 
