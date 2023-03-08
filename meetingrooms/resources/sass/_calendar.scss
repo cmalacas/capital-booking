@@ -152,6 +152,8 @@ body {
 
   .rbc-month-row {
 
+    overflow: visible;
+
     & + .rbc-month-row {
 
       border-top: solid 1px #e6ecf3;
