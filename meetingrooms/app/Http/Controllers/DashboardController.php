@@ -185,10 +185,12 @@ class DashboardController extends Controller
             $bookings = Booking::whereRaw("date = '$bookingDate' AND
                                         meetingroom_id = $meeting_room_id AND
                                         deleted = 0 AND
+                                        sagetransactions.payment_status = 2 AND
                                         expired_status = 0 AND (
                                             '$fromDate' BETWEEN from_date AND to_date
                                         )"
                                     )
+                            ->join('sagetransactions', 'sagetransactions.booking_id', '=', 'bookings.id')
                             ->get();
 
             //var_dump(DB::getQueryLog());

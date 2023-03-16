@@ -5,7 +5,7 @@ import Authservice from '../Authservice';
 import { formatter } from '../Functions';
 
 import {DropdownToggle, Nav, Dropdown, DropdownMenu, DropdownItem, Row, Col} from 'reactstrap';
-export default class Navigation extends Component {
+export default class Navigation2 extends Component {
 
     constructor(props) {
 
@@ -77,27 +77,6 @@ export default class Navigation extends Component {
                             <Fragment>
 
                                 
-
-                                <Nav>
-                                    <Dropdown isOpen={this.state.open} toggle={this.open}>
-                                        <DropdownToggle nav caret>
-                                            Meeting Rooms
-                                        </DropdownToggle>
-                                        <DropdownMenu>
-                                            { 
-                                                this.props.meeting_rooms.map( m => {
-
-                                                    return <DropdownItem onClick={ () => this.props.setRoom(m.id) }>{m.name}</DropdownItem>
-
-
-                                                })
-                                            }
-                                        </DropdownMenu>
-                                    </Dropdown>
-                                       
-                                </Nav>
-
-                               
 
                                 <ul className="navbar-nav ml-auto">
                                     <a id="navbarDropdown" className="nav-link dropdown-toggle" href="#" 

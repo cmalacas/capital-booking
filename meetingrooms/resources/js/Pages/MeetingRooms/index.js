@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 
-import Navigation from '../../components/layouts/navigation';
+import Navigation2 from '../../components/layouts/navigation2';
 
 import Authservice from '../../components/Authservice';
 
@@ -142,10 +142,6 @@ export default class MeetingRooms extends Component {
                         text: 'Name'
                     },
                     {
-                        dataField: 'amount_1',
-                        text: '1 Hr'
-                    },
-                    {
                         dataField: 'amount_2',
                         text: '2 Hrs'
                     },
@@ -153,6 +149,12 @@ export default class MeetingRooms extends Component {
                         dataField: 'amount_4',
                         text: '4 Hrs'
                     },
+
+                    {
+                        dataField: 'amount_6',
+                        text: '6 Hrs'
+                    },
+
                     {
                         dataField: 'amount_8',
                         text: '8 Hrs'
@@ -192,8 +194,9 @@ export default class MeetingRooms extends Component {
 
             <Fragment>
 
-                <Navigation 
+                <Navigation2 
                     user={user}
+                    meeting_rooms={ this.state.meetingrooms }
                 />
 
                 <div className="container">
@@ -243,11 +246,13 @@ class Add extends Component {
             amount_2: 0,
             amount_4: 0,
             amount_8: 0,
+            amount_6: 0,
             status: 1,
             errorName: false,
             errorAmount1: false,
             errorAmount2: false,
             errorAmount4: false,
+            errorAmount6: false,
             errorAmount8: false
             
         }
@@ -266,9 +271,10 @@ class Add extends Component {
         let errorAmount1 = false;
         let errorAmount2 = false;
         let errorAmount4 = false;
+        let errorAmount6 = false;
         let errorAmount8 = false;
 
-        const {name, amount_1, amount_2, amount_4, amount_8, status} = this.state;
+        const {name, amount_1, amount_2, amount_4, amount_8, amount_6, status} = this.state;
 
         if (name === '') {
 
@@ -305,15 +311,23 @@ class Add extends Component {
 
         }
 
+        if (amount_6 === 0) {
+
+            valid = false;
+            errorAmount6 = true;
+
+        }
+
         if (valid) {
 
-            const data = {name, amount_1, amount_2, amount_4, amount_8, status}
+            const data = {name, amount_1, amount_2, amount_4, amount_6, amount_8, status}
 
             this.setState({
                 name: '',
                 amount_1: 0,
                 amount_2: 0,
                 amount_4: 0,
+                amount_6: 0,
                 amount_8: 0,
                 status: 1,
                 open: false
@@ -330,6 +344,7 @@ class Add extends Component {
                 errorAmount1,
                 errorAmount2,
                 errorAmount4,
+                errorAmount6,
                 errorAmount8
             })
 
@@ -345,6 +360,7 @@ class Add extends Component {
             errorAmount1: false,
             errorAmount2: false,
             errorAmount4: false,
+            errorAmount6: false,
             errorAmount8: false
         });
 
@@ -378,7 +394,7 @@ class Add extends Component {
                     <ModalHeader>
                         Add Meeting Room
                     </ModalHeader>
-                    <ModalBody>
+                    <ModalBody className="p-3">
                         <FormGroup>
                             <Label>Name</Label>
                             <Input 
@@ -396,23 +412,9 @@ class Add extends Component {
                         </FormGroup>
 
                         <FormGroup row>
-                            <Col md={6}>
-                                <Label>Amount For 1 Hr</Label>
-                                <Input 
-                                    type="number" 
-                                    name="amount_1"
-                                    className={`${this.state.errorAmount1 ? 'is-invalid' : ''}`}
-                                    value={this.state.amount_1}
-                                    onChange={this.change}
-                                />
-                                { this.state.errorAmount1 ? 
-                                <span className="d-block invalid-feedback" role="alert">
-                                    <strong>this is required</strong>
-                                </span>
-                            : '' }
-                            </Col>
+                            
 
-                            <Col md={6}>
+                            <Col md={6} className="p-3">
                                 <Label>Amount For 2 Hrs</Label>
                                 <Input 
                                     type="number" 
@@ -427,10 +429,8 @@ class Add extends Component {
                                 </span>
                             : '' }
                             </Col>
-                        </FormGroup>
 
-                        <FormGroup row>
-                            <Col md={6}>
+                            <Col md={6} className="p-3 bg-white">
                                 <Label>Amount For 4 Hrs</Label>
                                 <Input 
                                     type="number" 
@@ -446,7 +446,28 @@ class Add extends Component {
                             : '' }
                             </Col>
 
-                            <Col md={6}>
+                        </FormGroup>
+
+                        <FormGroup row>
+                            
+
+                            <Col md={6} className="p-3 bg-white">
+                                <Label>Amount For 6 Hrs</Label>
+                                <Input 
+                                    type="number" 
+                                    name="amount_6"
+                                    className={`${this.state.errorAmount6 ? 'is-invalid' : ''}`}
+                                    value={this.state.amount_6}
+                                    onChange={this.change}
+                                />
+                                { this.state.errorAmount6 ? 
+                                <span className="d-block invalid-feedback" role="alert">
+                                    <strong>this is required</strong>
+                                </span>
+                            : '' }
+                            </Col>
+
+                            <Col md={6} className="p-3 bg-white">
                                 <Label>Amount For 8 Hrs</Label>
                                 <Input 
                                     type="number" 
@@ -501,6 +522,7 @@ class Edit extends Component {
         const amount_2 = room.amount_2;
         const amount_4 = room.amount_4;
         const amount_8 = room.amount_8;
+        const amount_6 = room.amount_6;
         const status = room.status;
         const id = room.id;
 
@@ -512,11 +534,13 @@ class Edit extends Component {
             amount_2: amount_2,
             amount_4: amount_4,
             amount_8: amount_8,
+            amount_6: amount_6,
             status: status,
             errorName: false,
             errorAmount1: false,
             errorAmount2: false,
             errorAmount4: false,
+            errorAmount6: false,
             errorAmount8: false
         }
 
@@ -534,9 +558,10 @@ class Edit extends Component {
         let errorAmount1 = false;
         let errorAmount2 = false;
         let errorAmount4 = false;
+        let errorAmount6 = false;
         let errorAmount8 = false;
 
-        const {name, amount_1, amount_2, amount_4, amount_8, status, id} = this.state;
+        const {name, amount_1, amount_2, amount_4, amount_6, amount_8, status, id} = this.state;
 
         if (name === '') {
 
@@ -573,9 +598,16 @@ class Edit extends Component {
 
         }
 
+        if (amount_6 === 0) {
+
+            valid = false;
+            errorAmount6 = true;
+
+        }
+
         if (valid) {
 
-            const data = {name, amount_1, amount_2, amount_4, amount_8, status, id}
+            const data = {name, amount_1, amount_2, amount_4, amount_8, amount_6, status, id}
 
             this.setState({
                 open: false
@@ -592,6 +624,7 @@ class Edit extends Component {
                 errorAmount1,
                 errorAmount2,
                 errorAmount4,
+                errorAmount6,
                 errorAmount8
             })
 
@@ -607,6 +640,7 @@ class Edit extends Component {
             errorAmount1: false,
             errorAmount2: false,
             errorAmount4: false,
+            errorAmount6: false,
             errorAmount8: false
         });
 
@@ -634,7 +668,7 @@ class Edit extends Component {
                     <ModalHeader>
                         Edit Meeting Room
                     </ModalHeader>
-                    <ModalBody>
+                    <ModalBody className="p-3">
                         <FormGroup>
                             <Label>Name</Label>
                             <Input 
@@ -652,23 +686,9 @@ class Edit extends Component {
                         </FormGroup>
 
                         <FormGroup row>
-                            <Col md={6}>
-                                <Label>Amount For 1 Hr</Label>
-                                <Input 
-                                    type="number" 
-                                    name="amount_1"
-                                    className={`${this.state.errorAmount1 ? 'is-invalid' : ''}`}
-                                    value={this.state.amount_1}
-                                    onChange={this.change}
-                                />
-                                { this.state.errorAmount1 ? 
-                                <span className="d-block invalid-feedback" role="alert">
-                                    <strong>this is required</strong>
-                                </span>
-                            : '' }
-                            </Col>
+                            
 
-                            <Col md={6}>
+                            <Col md={6} className="p-3 bg-white">
                                 <Label>Amount For 2 Hrs</Label>
                                 <Input 
                                     type="number" 
@@ -683,10 +703,8 @@ class Edit extends Component {
                                 </span>
                             : '' }
                             </Col>
-                        </FormGroup>
 
-                        <FormGroup row>
-                            <Col md={6}>
+                            <Col md={6} className="p-3 bg-white">
                                 <Label>Amount For 4 Hrs</Label>
                                 <Input 
                                     type="number" 
@@ -701,8 +719,28 @@ class Edit extends Component {
                                 </span>
                             : '' }
                             </Col>
+                        </FormGroup>
 
-                            <Col md={6}>
+                        <FormGroup row>
+
+                            <Col md={6} className="p-3 bg-white">
+                                <Label>Amount For 6 Hr</Label>
+                                <Input 
+                                    type="number" 
+                                    name="amount_6"
+                                    className={`${this.state.errorAmount6 ? 'is-invalid' : ''}`}
+                                    value={this.state.amount_6}
+                                    onChange={this.change}
+                                />
+                                { this.state.errorAmount6 ? 
+                                <span className="d-block invalid-feedback" role="alert">
+                                    <strong>this is required</strong>
+                                </span>
+                            : '' }
+                            </Col>
+                            
+
+                            <Col md={6} className="p-3 bg-white">
                                 <Label>Amount For 8 Hrs</Label>
                                 <Input 
                                     type="number" 

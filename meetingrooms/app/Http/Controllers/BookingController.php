@@ -14,9 +14,19 @@ use App\Sagetransaction;
 
 class BookingController extends Controller
 {
-    public function get() {
+    public function get(Request $request) {
 
         $user = User::find(auth()->id());
+
+        if ($request->has('room_id') && $request->get('room_id') > 0) {
+
+            $room_id = $request->get('room_id');
+
+        } else {
+
+            $room_id = MeetingRoom::first()->id;
+
+        }
 
         $bookings = Booking::select(
                             'bookings.*',
@@ -32,6 +42,8 @@ class BookingController extends Controller
                         ->join('users', 'users.id', '=', 'client_id')
                         ->leftJoin('sagetransactions', 'sagetransactions.booking_id', '=', 'bookings.id')
                         ->where(DB::raw('bookings.deleted'), '=', 0)
+                        ->where('meetingroom_id', '=', $room_id)
+                        ->where('sagetransactions.payment_status', '=', 2)
                         ->orderBy('date', 'desc');
 
         if ($user->type === 0) {
@@ -42,12 +54,11 @@ class BookingController extends Controller
                         
         $bookings = $bookings->get();
 
-        $meetingrooms = MeetingRoom::orderBy('name')
-                            ->where('status', '=', 1)
-                            ->where('deleted', '=', 0)
-                            ->get();
+        $meetingroom = MeetingRoom::where('id', '=', $room_id)->first();
 
-        $data = ['bookings' => $bookings, 'meetingrooms' => $meetingrooms];
+        $meetingrooms = MeetingRoom::orderBy('name')->get();
+
+        $data = ['bookings' => $bookings, 'meetingroom' => $meetingroom, 'meetingrooms' => $meetingrooms];
 
         return response()->json($data, 200, [], JSON_NUMERIC_CHECK);
 
@@ -70,6 +81,9 @@ class BookingController extends Controller
         $booking->payment_status = 0;
         $booking->total_amount = $request->get('total_amount');
         $booking->deleted = $payment_type === 1 ? 1 : 0;
+
+        $booking->your_company_name = $request->get('your_company_name');
+        $booking->your_account_email = $request->get('your_account_email');
 
         $booking->from_date = sprintf("%s %s", $request->get('booking_date'), $request->get('from_time'));
 
@@ -184,8 +198,6 @@ class BookingController extends Controller
         ]);  
 
         $crypt = $request->get('crypt');
-
-        print_r($request);
 
         $booking = Booking::find($booking_id);
 

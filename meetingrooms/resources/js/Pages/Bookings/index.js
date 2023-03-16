@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 
-import Navigation from '../../components/layouts/navigation';
+import Navigation2 from '../../components/layouts/navigation2';
 
 import Authservice from '../../components/Authservice';
 
@@ -224,7 +224,7 @@ export default class Bookings extends Component {
 
             <Fragment>
 
-                <Navigation 
+                <Navigation2 
                     user={user}
                 />
 

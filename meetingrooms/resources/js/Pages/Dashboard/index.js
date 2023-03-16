@@ -5,13 +5,11 @@ import Navigation from '../../components/layouts/navigation';
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
 
-import { useParams } from 'react-router-dom';
-
 import Authservice from '../../components/Authservice';
 
 const localizer = momentLocalizer(moment);
 
-import { Row, Col, Button, Modal, ModalHeader, ModalBody, ModalFooter, FormGroup, Input, Label, Table, ButtonGroup } from 'reactstrap';
+import { Row, Col, Button, Modal, ModalHeader, ModalBody, ModalFooter, FormGroup, Input, Label, Table, ButtonGroup, Card, CardBody } from 'reactstrap';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -31,16 +29,15 @@ export default class Dashboard extends Component {
 
         super(props);
 
-        const { id } = useParams();
-
         this.state = {
 
             user: { id: 0 },
             bookings: [],
+            meetingroom: {name: '', amount_2: 0, amount_4: 0, amount_6: 0, amount_8: 0, description: '', id: 0},
             meetingrooms: [],
             view: 'month',
             open: false,
-
+            room_id: 0,
             event: { client_name: '', meeting_room_name: '', _from_time: '', _to_time: '' },
 
         }
@@ -56,7 +53,13 @@ export default class Dashboard extends Component {
 
         this.close = this.close.bind(this);
 
+        this.setRoom = this.setRoom.bind(this);
 
+    }
+
+    setRoom(room_id) {
+
+        this.setState({ room_id}, () => this.getData());
 
     }
 
@@ -138,6 +141,8 @@ export default class Dashboard extends Component {
             <span><b>{date.format('MMMM')}</b><span> {date.format('YYYY')}</span></span>
           );
         };
+
+        
       
         return (
           <Row className="rbc-toolbar">
@@ -166,11 +171,14 @@ export default class Dashboard extends Component {
                 </Row>
             </Col>
             <Col md={2}>
+                { this.state.user.type === 0 ?
                 <Add 
                     user={ this.state.user }
-                    meetingrooms={ this.state.meetingrooms }
+                    meetingroom={ this.state.meetingroom }    
+                    meetingrooms={ this.state.meetingrooms }                
                     save={ this.save }
                 />
+                : '' }
             </Col>
                 
           </Row>
@@ -184,12 +192,23 @@ export default class Dashboard extends Component {
         let backgroundColor = '#a5a5a5';
         let color = '#2faaa9';
 
-        /* if (data.company === 'CO') {
+        if (this.state.user.type === 1) {
 
-            backgroundColor = '#bce5ff'; 
-            color = '#10a1ff';           
+            if (data.company === 'YCF') {
 
-        } */
+                backgroundColor = '#bce5ff'; 
+                color = '#10a1ff';           
+
+            } 
+
+            if (data.company === 'CO') {
+
+                backgroundColor = '#fcc1c1'; 
+                color = '#10a1ff';           
+
+            } 
+
+        }
 
         const style = {
             backgroundColor,            
@@ -221,17 +240,18 @@ export default class Dashboard extends Component {
 
     getData() {
 
-        const room_id = useParams();
+        const room_id = this.state.room_id;
 
-        console.log('room id', room_id);
+        const data = { room_id }
 
-        Authservice.post('/bookings/get', false)
+        Authservice.post('/bookings/get', data)
         .then( response => {
 
             if (response.bookings) {
 
                 this.setState({
                     bookings: response.bookings,
+                    meetingroom: response.meetingroom,
                     meetingrooms: response.meetingrooms
                 });
 
@@ -283,7 +303,7 @@ export default class Dashboard extends Component {
 
             const title = `${b.client_name} ${froms[0]}:${froms[1]} - ${tos[0]}:${tos[1]}`;
 
-            const desc = <Fragment>
+            let desc = <Fragment>
                             <div className="event-normal">
                                 <div className="client-name d-block">{b._from_time} - {b._to_time}</div>
                             </div>
@@ -293,6 +313,22 @@ export default class Dashboard extends Component {
                                 <div className="from-to-time d-block">{b._from_time} - {b._to_time}</div>
                             </div>
                          </Fragment>
+
+            if (user.type === 1) {
+
+                desc = <Fragment>
+                            <div className="event-normal">
+                                <div className="client-name d-block">{b.client_name}</div>
+                                <div className="from-to-time d-block">{b._from_time} - {b._to_time}</div>
+                            </div>
+                            <div className="event-selected">
+                                <div className="client-name d-block">{b.client_name}</div>                            
+                                <div className="meeting-room d-block">{b.meeting_room_name}</div>
+                                <div className="from-to-time d-block">{b._from_time} - {b._to_time}</div>
+                            </div>
+                         </Fragment>
+
+            }
 
             return {
 
@@ -321,6 +357,10 @@ export default class Dashboard extends Component {
               localizer.format(end, { date: 'short' }, culture)
           }), []) */
 
+          const room = this.state.meetingroom;
+
+          
+
         return (
 
             <Fragment>
@@ -328,11 +368,50 @@ export default class Dashboard extends Component {
                 <Navigation 
                     user={user}
                     meeting_rooms={this.state.meetingrooms}
+                    setRoom={ this.setRoom }
                 />
 
                 <div className="container mw-100">
                     <div className="row justify-content-center mr-0 ml-0">
                         <div className="col-md-12 pt-4">
+
+                            { user.type === 0 ?
+
+                            <Card className="mb-4">
+                                <CardBody>
+                                    <Row>
+                                        <Col md={3}></Col>
+                                        <Col md={6}>
+                                            <h4 className="text-center">{room.name}</h4>
+                                            <span className="d-block text-center">Price</span>
+                                            <Row className="mt-2">
+                                                <Col>
+                                                    <Row className="text-center">
+                                                        <Col>{formatter.format(room.amount_2)} for 2 hours</Col>
+                                                    </Row>
+                                                    <Row>
+                                                        <Col className="text-center">{formatter.format(room.amount_4)} for 4 hours</Col>
+                                                    </Row>
+                                                </Col>
+                                                <Col>
+                                                    <Row>
+                                                        <Col className="text-center">{formatter.format(room.amount_6)} for 6 hours</Col>
+                                                    </Row>
+                                                    <Row>
+                                                        <Col className="text-center">{formatter.format(room.amount_8)} for 8 hours</Col>
+                                                    </Row>
+                                                </Col>
+                                            </Row>
+                                            <Row className="mb-2 mt-2">
+                                                <Col className="text-center">{ room.description }</Col>
+                                            </Row>
+                                        </Col>
+                                        
+                                    </Row>
+                                </CardBody>
+                            </Card>
+
+                            : '' }
                            
 
                             <Calendar
@@ -404,7 +483,7 @@ class Add extends Component {
             open: false,
             client_id: user.id,
             client_name: `${user.firstname} ${user.lastname}`,
-            meeting_room_id: 0,
+            meeting_room_id: props.meetingroom.id,
             meeting_room_name: '',
             booking_date: `${_date.getFullYear()}-${_date.getMonth() + 1}-${_date.getDate()}`,
             from_time : '08:45',
@@ -444,7 +523,7 @@ class Add extends Component {
             errorCardCountry: false,
             errorCompany: false,
             errorYourCompanyName: false,
-            errorYOurAccountEmail: false,
+            errorYourAccountEmail: false,
             
         }
 
@@ -477,7 +556,15 @@ class Add extends Component {
 
             const card_last_name = user.lastname;
 
-            this.setState( { client_id, client_name, card_first_name, card_last_name });
+            const meeting_room_id = this.props.meetingroom.id;
+
+            this.setState( { client_id, client_name, card_first_name, card_last_name, meeting_room_id });
+
+        }
+
+        if (this.props.meetingroom.id != this.state.meeting_room_id) {
+
+            this.setState({ meeting_room_id: this.props.meetingroom.id }, () => this.getTotalAmount() );
 
         }
 
@@ -721,7 +808,11 @@ class Add extends Component {
 
     amount() {
 
-        const room = this.props.meetingrooms.filter( r => { return r.id === parseInt(this.state.meeting_room_id) } );
+        const meetingroom = this.props.meetingroom;
+
+        const meeting_room_id = meetingroom.id
+
+        const room = this.props.meetingrooms.filter( r => { return r.id === parseInt(meeting_room_id) } );
 
         return (
 
@@ -816,6 +907,8 @@ class Add extends Component {
         let errorCardAddress = false;
         let errorCardCountry = false;
         let errorCompany = false;
+        let errorYourCompanyName = false;
+        let errorYourAccountEmail = false;
 
         const {
                     client_id, 
@@ -836,7 +929,9 @@ class Add extends Component {
                     meeting_room_name,
                     offline_notes,
                     company,
-                    attendee
+                    attendee,
+                    your_company_name,
+                    your_account_email
                 } = this.state;
 
         const toTime = to_time.split(':');
@@ -926,6 +1021,20 @@ class Add extends Component {
             errorCompany = true;
 
         }
+
+        if (your_company_name === '') {
+
+            valid = false;
+            errorYourCompanyName = true;
+
+        }
+
+        if (your_account_email === '') {
+
+            valid = false;
+            errorYourAccountEmail = true;
+
+        }
        
 
         if (valid) {
@@ -949,7 +1058,9 @@ class Add extends Component {
                             meeting_room_name,
                             offline_notes,
                             company,
-                            attendee
+                            attendee,
+                            your_company_name,
+                            your_account_email
                         }
 
             this.setState({
@@ -974,7 +1085,9 @@ class Add extends Component {
                 errorCardPostCode,
                 errorCardAddress,
                 errorCardCountry,
-                errorCompany
+                errorCompany,
+                errorYourCompanyName,
+                errorYourAccountEmail
             })
 
         }
@@ -998,7 +1111,9 @@ class Add extends Component {
             errorCardPostCode: false,
             errorCardAddress: false,
             errorCardCountry: false,
-            errorCompany: false
+            errorCompany: false,
+            errorYourCompanyName: false,
+            errorYourAccountEmail: false
         }, 
             () => { 
 
@@ -1066,7 +1181,7 @@ class Add extends Component {
             const day = date.getDay();
             return day !== 0 && day !== 6;
         };
-        
+
         return (
 
             <Fragment>
@@ -1085,7 +1200,7 @@ class Add extends Component {
                                     </Col>
                                 </Row>
 
-                                <FormGroup row>
+                                {/* <FormGroup row>
                                     <Col>
                                         <Label>Meeting Room</Label>
                                         <Input 
@@ -1110,7 +1225,7 @@ class Add extends Component {
                                             </span>
                                         : '' }
                                     </Col>
-                                </FormGroup>
+                                        </FormGroup>*/}
 
                                 <FormGroup row>
 

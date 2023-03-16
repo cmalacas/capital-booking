@@ -25,6 +25,7 @@ class MeetingRoomController extends Controller
         $room->amount_2 = $request->get('amount_2');
         $room->amount_4 = $request->get('amount_4');
         $room->amount_8 = $request->get('amount_8');
+        $room->amount_6 = $request->get('amount_6');
 
         $room->status = $request->get('status');
 
@@ -44,6 +45,7 @@ class MeetingRoomController extends Controller
         $room->amount_2 = $request->get('amount_2');
         $room->amount_4 = $request->get('amount_4');
         $room->amount_8 = $request->get('amount_8');
+        $room->amount_6 = $request->get('amount_6');
 
         $room->status = $request->get('status');
 
