@@ -30,6 +30,10 @@ Route::group(['middleware' => 'auth:web'], function() {
             return view('welcome');
         });
 
+        Route::get('/{id}', function () {
+            return view('welcome');
+        });
+
         Route::post('/save', 'DashboardController@save');
         Route::get('/{id}/success', 'DashboardController@success');
 

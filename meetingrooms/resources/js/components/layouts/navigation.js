@@ -14,6 +14,7 @@ export default class Navigation extends Component {
         this.state = {
 
             room_id: 0,
+            open: false,
 
         }
 
@@ -29,9 +30,9 @@ export default class Navigation extends Component {
 
     }
 
-    open( room_id ) {
+    open() {
 
-        this.setState({ room_id: room_id === this.state.room_id ? 0 : room_id });
+        this.setState({ open: !this.state.open });
 
     }
 
@@ -76,14 +77,31 @@ export default class Navigation extends Component {
                             <Fragment>
 
                                 <Nav>
-                                    {
+                                    <Dropdown isOpen={this.state.open} toggle={this.open}>
+                                        <DropdownToggle nav caret>
+                                            Meeting Rooms
+                                        </DropdownToggle>
+                                        <DropdownMenu>
+                                            { 
+                                                this.props.meeting_rooms.map( m => {
+
+                                                    return <DropdownItem href={`/dashboard/${m.id}`}>
+                                                        {m.name}
+                                                    </DropdownItem>
+
+
+                                                })
+                                            }
+                                        </DropdownMenu>
+                                    </Dropdown>
+                                        {/* 
                                         this.props.meeting_rooms.map( m => {
 
                                             return (
 
                                                 <Dropdown isOpen={m.id === this.state.room_id} toggle={ () => this.open(m.id) }>
                                                     <DropdownToggle nav caret >
-                                                        {m.name}
+                                                        Meeting
                                                     </DropdownToggle>
                                                     <DropdownMenu>
                                                         <DropdownItem>
@@ -127,7 +145,7 @@ export default class Navigation extends Component {
                                             )
 
                                         })
-                                    }
+                                    */}
                                 </Nav>
 
                                 <ul className="navbar-nav ml-auto">

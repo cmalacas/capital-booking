@@ -1,9 +1,11 @@
-import React, {Component, Fragment, useMemo} from 'react';
+import React, {Component, Fragment} from 'react';
 
 import Navigation from '../../components/layouts/navigation';
 
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
+
+import { useParams } from 'react-router-dom';
 
 import Authservice from '../../components/Authservice';
 
@@ -29,6 +31,8 @@ export default class Dashboard extends Component {
 
         super(props);
 
+        const { id } = useParams();
+
         this.state = {
 
             user: { id: 0 },
@@ -51,6 +55,8 @@ export default class Dashboard extends Component {
         this.eventSelect = this.eventSelect.bind(this);
 
         this.close = this.close.bind(this);
+
+
 
     }
 
@@ -214,6 +220,10 @@ export default class Dashboard extends Component {
     }
 
     getData() {
+
+        const room_id = useParams();
+
+        console.log('room id', room_id);
 
         Authservice.post('/bookings/get', false)
         .then( response => {
