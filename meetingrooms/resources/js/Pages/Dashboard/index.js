@@ -89,12 +89,33 @@ export default class Dashboard extends Component {
         }   
     
         const goToBack = () => {
-          toolbar.date.setMonth(toolbar.date.getMonth() - 1);
-          toolbar.onNavigate('prev');
+
+            if (this.state.view === 'month') {
+
+                toolbar.date.setMonth(toolbar.date.getMonth() - 1);
+
+            } else if (this.state.view === 'week') {
+
+                toolbar.date.setDate(toolbar.date.getDate() - 7);
+
+            }
+
+            toolbar.onNavigate('prev');
         };
       
         const goToNext = () => {
-          toolbar.date.setMonth(toolbar.date.getMonth() + 1);
+
+            if (this.state.view === 'month') {
+
+                toolbar.date.setMonth(toolbar.date.getMonth() + 1);
+
+            } else if (this.state.view === 'week') {
+
+                toolbar.date.setDate(toolbar.date.getDate() + 7);
+
+            }
+
+
           toolbar.onNavigate('next');
         };
       
@@ -154,15 +175,15 @@ export default class Dashboard extends Component {
 
         const data = event.data;
 
-        let backgroundColor = '#d0f7f0';
+        let backgroundColor = '#a5a5a5';
         let color = '#2faaa9';
 
-        if (data.company === 'CO') {
+        /* if (data.company === 'CO') {
 
             backgroundColor = '#bce5ff'; 
             color = '#10a1ff';           
 
-        }
+        } */
 
         const style = {
             backgroundColor,            
@@ -254,8 +275,7 @@ export default class Dashboard extends Component {
 
             const desc = <Fragment>
                             <div className="event-normal">
-                                <div className="client-name d-block">{b.client_name}</div>                            
-                                <div className="from-to-time d-block">{b._from_time} - {b._to_time}</div>
+                                <div className="client-name d-block">{b._from_time} - {b._to_time}</div>
                             </div>
                             <div className="event-selected">
                                 <div className="client-name d-block">{b.client_name}</div>                            
@@ -297,6 +317,7 @@ export default class Dashboard extends Component {
 
                 <Navigation 
                     user={user}
+                    meeting_rooms={this.state.meetingrooms}
                 />
 
                 <div className="container mw-100">
@@ -392,6 +413,8 @@ class Add extends Component {
             errorFromTime: false,
             errorDuration: false,
             payment_type: 0,
+            your_company_name: '',
+            your_account_email: '',
             card_first_name: user.firstname,
             card_last_name: user.lastname,
             card_city: '',
@@ -409,7 +432,9 @@ class Add extends Component {
             errorCardPostCode: false,
             errorCardAddress: false,
             errorCardCountry: false,
-            errorCompany: false
+            errorCompany: false,
+            errorYourCompanyName: false,
+            errorYOurAccountEmail: false,
             
         }
 
@@ -507,6 +532,11 @@ class Add extends Component {
 
                 amount = room[0].amount_2;
                 hour += 2
+
+            } else if (parseInt(duration) === 6) {
+                
+                amount = room[0].amount_6;
+                hour += 6
 
             } else if (parseInt(duration) === 4) {
                 
@@ -1021,6 +1051,11 @@ class Add extends Component {
             }
 
         });
+
+        const isWeekday = (date) => {
+            const day = date.getDay();
+            return day !== 0 && day !== 6;
+        };
         
         return (
 
@@ -1082,6 +1117,7 @@ class Add extends Component {
                                         <DatePicker 
                                             selected={booking_date}
                                             className="form-control"
+                                            filterDate={ isWeekday }
                                             onSelect={this.selectDate}
                                             minDate={ new Date }
                                         />
@@ -1139,9 +1175,9 @@ class Add extends Component {
                                             onChange={this.change}
                                         >
                                             <option key="0hr" value="0">Select duration</option>
-                                            <option key="1hr" value="1">1 Hr</option>
                                             <option key="2hr" value="2">2 Hrs</option>
                                             <option key="4hr" value="4">4 Hrs</option>
+                                            <option key="6hr" value="6">6 Hrs</option>
                                             <option key="8hr" value="8">8 Hrs</option>
                                         </Input>
                                         { this.state.errorDuration ?
@@ -1171,14 +1207,14 @@ class Add extends Component {
                                 <FormGroup row>
 
                                     <Col>
-                                        <Label>Select company</Label>
+                                        <Label>Select provider</Label>
                                         <Input 
                                             type="select" 
                                             onChange={this.change} 
                                             className={`form-control ${this.state.errorCompany ? 'is-invalid' : ''}`} 
                                             name="company"
                                         >
-                                            <option value="">Select company</option>
+                                            <option value="">Select provider</option>
                                             <option value="CO">Capital Office</option>
                                             <option value="YCF">Your Company Formation</option>
                                         </Input>
@@ -1190,6 +1226,50 @@ class Add extends Component {
                                     </Col>
 
                                     
+
+                                </FormGroup>
+
+                                <FormGroup row>
+
+                                    <Col>
+                                        <Label>
+                                            Your Company Name
+                                            <span style={{ fontSize: '10px', letterSpacing: '0.2px' }} className="d-block">Please provide your Company Name on your account with Capital Office or Your Company Formations</span>
+                                        </Label>
+                                        <Input 
+                                            type="text" 
+                                            onChange={this.change} 
+                                            className={`form-control ${this.state.errorYourCompanyName ? 'is-invalid' : ''}`} 
+                                            name="your_company_name"
+                                        />
+                                        { this.state.errorYourCompanyName ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
+
+                                </FormGroup>
+
+                                <FormGroup row>
+
+                                    <Col>
+                                        <Label>
+                                            Your Account Email
+                                            <span style={{ fontSize: '10px', letterSpacing: '0.2px' }} className="d-block">Please provide your displayed on your account with Capital Office or Your Company Formations so we can locate your information on our database</span>
+                                        </Label>
+                                        <Input 
+                                            type="text" 
+                                            onChange={this.change} 
+                                            className={`form-control ${this.state.errorYourAccountEmail ? 'is-invalid' : ''}`} 
+                                            name="your_account_email"
+                                        />
+                                        { this.state.errorYourAccountEmail ?
+                                            <span className="d-block invalid-feedback" role="alert">
+                                                <strong>this is required</strong>
+                                            </span>
+                                        : '' }
+                                    </Col>
 
                                 </FormGroup>
 

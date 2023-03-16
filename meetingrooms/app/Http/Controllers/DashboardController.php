@@ -171,16 +171,25 @@ class DashboardController extends Controller
 
             //DB::enableQueryLog();
 
-            $bookings = Booking::whereRaw("date = '$bookingDate' AND
+            /* $bookings = Booking::whereRaw("date = '$bookingDate' AND
                                             meetingroom_id = $meeting_room_id AND
                                             deleted = 0 AND
                                             expired_status = 0 AND (
-                                                ('$fromDate' >= from_date AND '$toDate' <= to_date) OR
-                                                ('$fromDate' < from_date AND '$toDate' < to_date) OR
-                                                ('$fromDate' > from_date  AND '$fromDate' < to_date AND to_date < '$toDate')
+                                                ('$fromDate' >= from_date AND '$toDate' <= date_add(to_date, INTERVAL 15 MINUTE)) OR
+                                                ('$fromDate' < from_date AND '$toDate' < date_add(to_date, INTERVAL 15 MINUTE)) OR
+                                                ('$fromDate' > from_date  AND '$fromDate' <= DATE_ADD(to_date, INTERVAL 15 MINUTE) AND DATE_ADD(to_date, INTERVAL 15 MINUTE) <= '$toDate')
                                             )"
                                         )
-                                ->get();
+                                ->get(); */
+
+            $bookings = Booking::whereRaw("date = '$bookingDate' AND
+                                        meetingroom_id = $meeting_room_id AND
+                                        deleted = 0 AND
+                                        expired_status = 0 AND (
+                                            '$fromDate' BETWEEN from_date AND to_date
+                                        )"
+                                    )
+                            ->get();
 
             //var_dump(DB::getQueryLog());
 
