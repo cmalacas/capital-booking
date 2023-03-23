@@ -3,6 +3,42 @@ body {
   background-color: #fff;
 }
 
+.header {
+
+  &.navbar {
+
+    position: relative;
+
+    &:before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      height: 60px;
+      width: 200px;
+      background-repeat: no-repeat;
+      background-size: 100%;
+      background-image:url('/images/2021-logo.png');
+    }
+
+    &:after {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 9px;
+      right: 30px;
+      height: 60px;
+      width: 100px;
+      background-repeat: no-repeat;
+      background-size: 100%;
+      background-image:url('/images/YCF-Logo.png');
+    }
+
+  }
+
+}
+
 .navbar-nav {
   position: relative;
 }

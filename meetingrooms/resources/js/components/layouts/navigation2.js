@@ -52,11 +52,8 @@ export default class Navigation2 extends Component {
 
             <Fragment>
 
-                <nav className="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+                <nav className="header navbar navbar-expand-md navbar-light bg-white shadow-sm">
                     <div className="container">
-                        <a className="navbar-brand" href="/">
-                            LOGO HERE
-                        </a>
                         <button className="navbar-toggler"  
                             type="button" 
                             data-toggle="collapse"
@@ -90,6 +87,12 @@ export default class Navigation2 extends Component {
                                             user.type === 1 ?
 
                                                 <Fragment>
+                                                    <a 
+                                                        className="nav-link" 
+                                                        href="/"
+                                                    >
+                                                        Dashboard
+                                                    </a>
                                                     <a 
                                                         className="nav-link" 
                                                         href="/meetingrooms"

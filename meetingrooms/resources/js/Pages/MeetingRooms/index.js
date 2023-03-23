@@ -247,6 +247,7 @@ class Add extends Component {
             amount_4: 0,
             amount_8: 0,
             amount_6: 0,
+            description: '',
             status: 1,
             errorName: false,
             errorAmount1: false,
@@ -274,7 +275,7 @@ class Add extends Component {
         let errorAmount6 = false;
         let errorAmount8 = false;
 
-        const {name, amount_1, amount_2, amount_4, amount_8, amount_6, status} = this.state;
+        const {name, amount_1, amount_2, amount_4, amount_8, amount_6, status, description} = this.state;
 
         if (name === '') {
 
@@ -320,7 +321,7 @@ class Add extends Component {
 
         if (valid) {
 
-            const data = {name, amount_1, amount_2, amount_4, amount_6, amount_8, status}
+            const data = {name, amount_1, amount_2, amount_4, amount_6, amount_8, status, description}
 
             this.setState({
                 name: '',
@@ -485,6 +486,11 @@ class Add extends Component {
                         </FormGroup>
 
                         <FormGroup>
+                            <Label>Description</Label>
+                            <Input type="textarea" name="description" value={ this.state.description } onChange={ this.change } />
+                        </FormGroup>
+
+                        <FormGroup>
                             <Label>
                                 <Input 
                                     type="checkbox"
@@ -523,6 +529,7 @@ class Edit extends Component {
         const amount_4 = room.amount_4;
         const amount_8 = room.amount_8;
         const amount_6 = room.amount_6;
+        const description = room.description;
         const status = room.status;
         const id = room.id;
 
@@ -536,6 +543,7 @@ class Edit extends Component {
             amount_8: amount_8,
             amount_6: amount_6,
             status: status,
+            description: description,
             errorName: false,
             errorAmount1: false,
             errorAmount2: false,
@@ -561,7 +569,7 @@ class Edit extends Component {
         let errorAmount6 = false;
         let errorAmount8 = false;
 
-        const {name, amount_1, amount_2, amount_4, amount_6, amount_8, status, id} = this.state;
+        const {name, amount_1, amount_2, amount_4, amount_6, amount_8, status, id, description} = this.state;
 
         if (name === '') {
 
@@ -607,7 +615,7 @@ class Edit extends Component {
 
         if (valid) {
 
-            const data = {name, amount_1, amount_2, amount_4, amount_8, amount_6, status, id}
+            const data = {name, amount_1, amount_2, amount_4, amount_8, amount_6, status, id, description}
 
             this.setState({
                 open: false
@@ -755,6 +763,11 @@ class Edit extends Component {
                                 </span>
                             : '' }
                             </Col>
+                        </FormGroup>
+
+                        <FormGroup>
+                            <Label>Description</Label>
+                            <Input type="textarea" name="description" value={ this.state.description } onChange={ this.change } />
                         </FormGroup>
 
                         <FormGroup>
