@@ -375,7 +375,7 @@ export default class Dashboard extends Component {
                     <div className="row justify-content-center mr-0 ml-0">
                         <div className="col-md-12 pt-4">
 
-                            { user.type === 0 ?
+                            
 
                             <Card className="mb-4">
                                 <CardBody>
@@ -411,7 +411,7 @@ export default class Dashboard extends Component {
                                 </CardBody>
                             </Card>
 
-                            : '' }
+                            
                            
 
                             <Calendar
