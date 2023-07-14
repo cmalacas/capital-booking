@@ -58,7 +58,14 @@ class BookingController extends Controller
 
         $meetingrooms = MeetingRoom::orderBy('name')->get();
 
-        $data = ['bookings' => $bookings, 'meetingroom' => $meetingroom, 'meetingrooms' => $meetingrooms];
+        $clients = User::where('type', '=', 0)->orderBy('firstname')->get();
+
+        $data = [
+                'bookings' => $bookings, 
+                'meetingroom' => $meetingroom, 
+                'meetingrooms' => $meetingrooms,
+                'clients' => $clients
+            ];
 
         return response()->json($data, 200, [], JSON_NUMERIC_CHECK);
 

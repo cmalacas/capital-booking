@@ -453,7 +453,7 @@ export default class Dashboard extends Component {
                         </Row>
                         <Row>
                             <Col className="event-time">
-                                { this.state.event._from_time} - { this.state.event._to_time }
+                                { this.state.event._from_time } - { this.state.event._to_time }
                             </Col>
                         </Row>
                     </ModalBody>
@@ -515,6 +515,7 @@ class Add extends Component {
             founds: [],
             valid: false,
             validated: false,
+            maxCapacity: props.meetingroom.capacity,
             errorCardFirstName: false,
             errorCardLastName: false,
             errorCardCity: false,
@@ -858,9 +859,6 @@ class Add extends Component {
 
         const value = e.target.value;
 
-
-
-
         this.setState( { search_client: value, lookup: true } , () => {
 
             if (value.length > 1) {
@@ -1171,16 +1169,25 @@ class Add extends Component {
                 excludeTimes.push(setHours(setMinutes(new Date, 0), h));
                 excludeTimes.push(setHours(setMinutes(new Date, 15), h));
                 excludeTimes.push(setHours(setMinutes(new Date, 30), h));
-                excludeTimes.push(setHours(setMinutes(new Date, 45), h));
+                
 
             }
 
         });
 
+        const includeTimes = [ 
+                setHours(setMinutes(new Date(), 45), 8),
+                setHours(setMinutes(new Date(), 45), 10),
+                setHours(setMinutes(new Date(), 45), 12),
+                setHours(setMinutes(new Date(), 45), 14),                
+            ];
+
         const isWeekday = (date) => {
             const day = date.getDay();
             return day !== 0 && day !== 6;
         };
+
+        const maxCapacity = this.props.meetingroom.capacity;
 
         return (
 
@@ -1269,6 +1276,7 @@ class Add extends Component {
                                             showTimeSelectOnly
                                             timeIntervals={15}
                                             excludeTimes={excludeTimes}
+                                            includeTimes={includeTimes}
                                             timeCaption="Time"
                                             dateFormat="h:mm aa" 
                                         />
@@ -1318,7 +1326,7 @@ class Add extends Component {
                                             type="number" 
                                             name="attendee" 
                                             min="2" 
-                                            max="8" 
+                                            max={ maxCapacity } 
                                             onChange={this.change} 
                                             value={this.state.attendee}
                                         />

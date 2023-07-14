@@ -499,3 +499,15 @@ body {
     }
   }
 }
+
+.react-datepicker {
+
+  &__time-list-item {
+
+    &--disabled {
+      display: none;
+    }
+
+  }
+
+}

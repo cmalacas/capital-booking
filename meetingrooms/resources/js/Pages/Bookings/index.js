@@ -14,6 +14,14 @@ import { faPlus, faSave, faTrash, faEdit, faCheckCircle, faTruckMedical } from '
 
 import { formatter, format_datetime, format_date } from '../../components/Functions';
 
+import DatePicker from 'react-datepicker';
+import setHours from 'date-fns/setHours';
+import setMinutes from 'date-fns/setMinutes';
+
+import "react-datepicker/dist/react-datepicker.css";
+
+import Select from 'react-select';
+
 export default class Bookings extends Component {
 
     constructor(props) {
@@ -24,7 +32,8 @@ export default class Bookings extends Component {
 
             user: {id: 0 },
             bookings: [],
-            meetingrooms: []
+            meetingrooms: [],
+            clients: [],
 
         }
 
@@ -34,6 +43,7 @@ export default class Bookings extends Component {
         this.update = this.update.bind(this);
         this.updateStatus = this.updateStatus.bind(this);
         this.delete = this.delete.bind(this);
+       
     }
 
     delete(id) {
@@ -51,6 +61,7 @@ export default class Bookings extends Component {
 
     }
 
+    
     updateStatus(data) {
 
         Authservice.post('/meetingrooms/update-status', {id: data.id})
@@ -117,7 +128,8 @@ export default class Bookings extends Component {
 
                 this.setState({
                     bookings: response.bookings,
-                    meetingrooms: response.meetingrooms
+                    meetingrooms: response.meetingrooms,
+                    clients: response.clients
                 });
 
             }
@@ -235,6 +247,7 @@ export default class Bookings extends Component {
                             <Add
                                 save={this.save} 
                                 meetingrooms={this.state.meetingrooms}
+                                clients={ this.state.clients }
                             />
 
                             <Card>
@@ -278,7 +291,7 @@ class Add extends Component {
             meeting_room_id: 0,
             meeting_room_name: '',
             booking_date: '',
-            from_time : '',
+            from_time : '08:45',
             to_time: '',
             duration: 0,
             total_amount: 0,
@@ -317,7 +330,23 @@ class Add extends Component {
         this.amount = this.amount.bind(this);
         this.booking = this.booking.bind(this);
         this.getTotalAmount = this.getTotalAmount.bind(this);
+
+        this.selectTime = this.selectTime.bind(this);
     }
+
+    selectTime(date) {
+
+        const hours = date.getHours();
+        const mins = date.getMinutes();
+
+        const from_time = `${hours < 10 ? '0' + hours : hours}:${mins < 10 ? '0' + mins : mins}`;
+
+        this.setState({ from_time }, () => this.getTotalAmount());
+
+    }
+
+    
+
 
     getTotalAmount() {
 
@@ -381,7 +410,7 @@ class Add extends Component {
             total_amount, 
             to_time, 
             meeting_room_name 
-        })
+        }) 
 
     }
 
@@ -451,7 +480,7 @@ class Add extends Component {
 
                 <Col md={3} className="border-right border-white text-white">
 
-                    <Label>From Time:</Label>
+                    <Label className="text-white">From Time:</Label>
 
                     <h4 className="text-white">{ from_time[0] }:{ from_time[1] }</h4>
 
@@ -459,7 +488,7 @@ class Add extends Component {
 
                 <Col md={3} className="border-right border-white text-white">
 
-                    <Label>To Time:</Label>
+                    <Label className="text-white">To Time:</Label>
 
                     <h4 className="text-white">{ to_time }</h4>
 
@@ -467,7 +496,7 @@ class Add extends Component {
 
                 <Col md={3} className="border-right border-white text-white">
 
-                    <Label>Duration:</Label>
+                    <Label className="text-white">Duration:</Label>
 
                     <h4 className="text-white">{ this.state.duration } Hr</h4>
 
@@ -475,7 +504,7 @@ class Add extends Component {
 
                 <Col md={3} className="text-white">
 
-                    <Label>Amount:</Label>
+                    <Label className="text-white">Amount:</Label>
 
                     <h4 className="text-white">{ formatter.format(amount) }</h4>
 
@@ -496,7 +525,7 @@ class Add extends Component {
 
                 <Col md={3} className="border-right border-white text-white">
 
-                    <Label>1 Hr:</Label>
+                    <Label className="text-white">1 Hr:</Label>
 
                     <h4 className="text-white">{ formatter.format(room[0].amount_1) }</h4>
 
@@ -504,7 +533,7 @@ class Add extends Component {
 
                 <Col md={3} className="border-right border-white text-white">
 
-                    <Label>2 Hr:</Label>
+                    <Label className="text-white">2 Hr:</Label>
 
                     <h4 className="text-white">{ formatter.format(room[0].amount_2) }</h4>
 
@@ -512,7 +541,7 @@ class Add extends Component {
 
                 <Col md={3} className="border-right border-white text-white">
 
-                    <Label>4 Hr:</Label>
+                    <Label className="text-white">4 Hr:</Label>
 
                     <h4 className="text-white">{ formatter.format(room[0].amount_4) }</h4>
 
@@ -520,7 +549,7 @@ class Add extends Component {
 
                 <Col md={3} className="text-white">
 
-                    <Label>8 Hr:</Label>
+                    <Label className="text-white">8 Hr:</Label>
 
                     <h4 className="text-white">{ formatter.format(room[0].amount_8) }</h4>
 
@@ -548,7 +577,7 @@ class Add extends Component {
     }
 
     selectClient(client) {
-        this.setState( {
+        {/*this.setState( {
 
             lookup: false,
             client_id: client.id,
@@ -556,7 +585,7 @@ class Add extends Component {
             card_first_name: client.firstname,
             card_last_name: client.lastname
 
-        } )
+        } ) */}
     }
 
     setPaymentType(payment_type) {
@@ -741,8 +770,8 @@ class Add extends Component {
             errorCardAddress: false,
             errorCardCountry: false
         }, 
-            () => { this.getTotalAmount() }
-        );
+            () => { this.getTotalAmount() } 
+        ); 
 
     }
 
@@ -762,6 +791,54 @@ class Add extends Component {
 
         const founds = this.state.lookup ? <Found clients={ this.state.founds } select={this.selectClient} /> : '';
 
+        const excludeTimes = [];
+
+        const hours = [0, 1, 2, 3, 4, 5, 6, 7, 8, 17, 18, 19, 20, 21, 22, 23];
+
+        hours.map( h => {
+
+            if ( h === 8) {
+
+                excludeTimes.push(setHours(setMinutes(new Date, 0), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 15), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 30), h));
+
+            } else {
+
+                excludeTimes.push(setHours(setMinutes(new Date, 0), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 15), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 30), h));
+                
+
+            }
+
+        });
+
+        const includeTimes = [ 
+                setHours(setMinutes(new Date(), 45), 8),
+                setHours(setMinutes(new Date(), 45), 10),
+                setHours(setMinutes(new Date(), 45), 12),
+                setHours(setMinutes(new Date(), 45), 14),                
+            ];
+
+        let booking_date = new Date();
+
+        let times = this.state.from_time.split(':');
+
+        if (this.state.booking_date) {
+
+            const dates = this.state.booking_date.split('-')
+
+            booking_date = new Date(dates[0], parseInt(dates[1]) - 1, dates[2], times[0], times[1]);
+
+        }    
+
+        const clients = this.props.clients.map( c => {
+
+            return { value: c.id, label: `${c.firstname} ${c.lastname}`}
+
+        })
+
         return (
 
             <Fragment>
@@ -780,7 +857,7 @@ class Add extends Component {
                         <Row>
                             <Col md={6}>
                                 <FormGroup row>
-                                    <Col md={6}>
+                                    {/*<Col md={6}>
                                         <Label>Client Name</Label>
                                         <Input 
                                             type="text" 
@@ -803,7 +880,19 @@ class Add extends Component {
                                                 <strong>this is required</strong>
                                             </span>
                                         : '' }
-                                    </Col>
+                                        </Col> */}
+
+                                        <Col>
+
+                                            <Label>Client Name</Label>
+                                            <Select 
+                                                isClearable={ true }
+                                                isSearchable={ true }
+                                                onChange={ this.selectClient }
+                                                placeholder=" - select client -"
+                                                options={ clients }
+                                            />
+                                        </Col>
                                 </FormGroup>
 
                                 <FormGroup row>
@@ -859,13 +948,25 @@ class Add extends Component {
                                 <FormGroup row>
                                     <Col md={6}>
                                         <Label>From Time</Label>
-                                        <Input 
+                                        <DatePicker
+                                            selected={ booking_date }
+                                            onChange={this.selectTime}
+                                            className="form-control"
+                                            showTimeSelect
+                                            showTimeSelectOnly
+                                            timeIntervals={15}
+                                            excludeTimes={excludeTimes}
+                                            includeTimes={includeTimes}
+                                            timeCaption="Time"
+                                            dateFormat="h:mm aa" 
+                                        />
+                                        {/* <Input 
                                             type="time" 
                                             name="from_time"
                                             value={this.state.from_time}
                                             onChange={this.change}
                                             className={this.state.errorFromTime ? 'is-invalid' : '' }
-                                        />
+                                />*/}
                                         { this.state.errorFromTime ?
                                             <span className="d-block invalid-feedback" role="alert">
                                                 <strong>this is required</strong>
