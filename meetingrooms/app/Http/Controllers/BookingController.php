@@ -42,8 +42,6 @@ class BookingController extends Controller
                         ->join('users', 'users.id', '=', 'client_id')
                         ->leftJoin('sagetransactions', 'sagetransactions.booking_id', '=', 'bookings.id')
                         ->where(DB::raw('bookings.deleted'), '=', 0)
-                        ->where('meetingroom_id', '=', $room_id)
-                        ->where('sagetransactions.payment_status', '=', 2)
                         ->orderBy('date', 'desc');
 
         if ($user->type === 0) {
@@ -182,7 +180,7 @@ class BookingController extends Controller
         //return response()->json(['success' => true, 'booking' => $booking, 'code' => $booking->id], 200, [], JSON_NUMERIC_CHECK);
 
 
-        return $this->get();
+        return $this->get($request);
 
     }
 

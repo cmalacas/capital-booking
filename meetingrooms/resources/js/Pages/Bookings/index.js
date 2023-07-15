@@ -201,7 +201,8 @@ export default class Bookings extends Component {
                     },
                     {
                         dataField: 'actions',
-                        text: 'Actions'
+                        text: 'Actions',
+                        classes: 'no-wrap'
                     }
                 ];
 
@@ -219,6 +220,8 @@ export default class Bookings extends Component {
                             <Edit
                                 meetingrooms={this.state.meetingrooms}
                                 save={this.update} 
+                                clients={ this.state.clients }
+                                booking={ b }
                             />
                             <Button 
                                 color="danger"
@@ -230,7 +233,17 @@ export default class Bookings extends Component {
 
             return b;
 
-        })
+        });
+
+        const rowClasses = (row) => {
+
+            if (row.expired_status_text === 'Expired') {
+
+                return 'bg-warning';
+
+            }
+
+        }
 
         return (
 
@@ -261,6 +274,7 @@ export default class Bookings extends Component {
                                         columns={ columns } 
                                         hover={true}
                                         striped={true}
+                                        rowClasses={ rowClasses }
                                     />
                                 </CardBody>
                             </Card>
@@ -277,7 +291,7 @@ export default class Bookings extends Component {
 
 }
 
-class Add extends Component {
+export class Add extends Component {
 
     constructor(props) {
 
@@ -577,15 +591,16 @@ class Add extends Component {
     }
 
     selectClient(client) {
-        {/*this.setState( {
+        
+        this.setState( {
 
             lookup: false,
-            client_id: client.id,
-            client_name: `${client.firstname} ${client.lastname}`,
+            client_id: client.value,
+            client_name: client.label,
             card_first_name: client.firstname,
             card_last_name: client.lastname
 
-        } ) */}
+        } ) 
     }
 
     setPaymentType(payment_type) {
@@ -835,7 +850,12 @@ class Add extends Component {
 
         const clients = this.props.clients.map( c => {
 
-            return { value: c.id, label: `${c.firstname} ${c.lastname}`}
+            return { 
+                    value: c.id, 
+                    label: `${c.firstname} ${c.lastname}`,
+                    firstname: c.firstname,
+                    lastname: c.lastname
+                   }
 
         })
 
@@ -1223,17 +1243,20 @@ class Edit extends Component {
 
         super(props);
 
+        const booking = props.booking;
+
         this.state = {
 
+            id: booking.id,
             open: false,
-            client_id: 0,
-            client_name: '',
-            meeting_room_id: 0,
-            booking_date: '',
-            from_time : '',
-            to_time: '',
-            duration: 0,
-            description: '',
+            client_id: booking.client_id,
+            client_name: booking.client_anme,
+            meeting_room_id: booking.meetingroom_id,
+            date: booking.date,
+            from_time : booking.from_time,
+            to_time: booking.to_time,
+            duration: booking.duration,
+            description: booking.description,
             errorClientName: false,
             errorMeetingRoom: false,
             errorBookingDate: false,
@@ -1265,6 +1288,18 @@ class Edit extends Component {
         this.setPaymentType = this.setPaymentType.bind(this);
         this.selectClient = this.selectClient.bind(this);
         this.search = this.search.bind(this);
+        this.selectTime = this.selectTime.bind(this);
+    }
+
+    selectTime(date) {
+
+        const hours = date.getHours();
+        const mins = date.getMinutes();
+
+        const from_time = `${hours < 10 ? '0' + hours : hours}:${mins < 10 ? '0' + mins : mins}`;
+
+        this.setState({ from_time }, () => this.getTotalAmount());
+
     }
 
     search(e) {
@@ -1491,6 +1526,62 @@ class Edit extends Component {
 
         const founds = this.state.lookup ? <Found clients={ this.state.founds } select={this.selectClient} /> : '';
 
+        const excludeTimes = [];
+
+        const hours = [0, 1, 2, 3, 4, 5, 6, 7, 8, 17, 18, 19, 20, 21, 22, 23];
+
+        hours.map( h => {
+
+            if ( h === 8) {
+
+                excludeTimes.push(setHours(setMinutes(new Date, 0), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 15), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 30), h));
+
+            } else {
+
+                excludeTimes.push(setHours(setMinutes(new Date, 0), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 15), h));
+                excludeTimes.push(setHours(setMinutes(new Date, 30), h));
+                
+
+            }
+
+        });
+
+        const includeTimes = [ 
+                setHours(setMinutes(new Date(), 45), 8),
+                setHours(setMinutes(new Date(), 45), 10),
+                setHours(setMinutes(new Date(), 45), 12),
+                setHours(setMinutes(new Date(), 45), 14),                
+            ];
+
+        let booking_date = new Date();
+
+        let times = this.state.from_time.split(':');
+
+        if (this.state.date) {
+
+            const dates = this.state.date.split('-')
+
+            booking_date = new Date(dates[0], parseInt(dates[1]) - 1, dates[2], times[0], times[1]);
+
+        };
+        
+        let client = [];
+
+        const clients = this.props.clients.map( c => {
+
+            if (c.id === this.state.client_id) {
+
+                client = { value: c.id, label: `${c.firstname} ${c.lastname}`, firstname: c.firstname, lastname: c.lastname }
+
+            }
+
+            return { value: c.id, label: `${c.firstname} ${c.lastname}`, firstname: c.firstname, lastname: c.lastname }
+
+        })
+
         return (
 
             <Fragment>
@@ -1504,30 +1595,13 @@ class Edit extends Component {
                     <ModalBody>
                         <Row>
                             <Col md={6}>
-                                <FormGroup row>
-                                    <Col md={6}>
-                                        <Label>Client Name</Label>
-                                        <Input 
-                                            type="text" 
-                                            name="name"
-                                            placeholder="Search Client"
-                                            onChange={this.search}
+                                <FormGroup row>                                    
+
+                                    <Col>
+                                        <Select 
+                                            defaultValue={ client }
+                                            options={ clients }
                                         />
-                                        { founds }
-                                    </Col>
-                                    <Col md={6}>
-                                        <Label>&nbsp;</Label>
-                                        <Input type="text" 
-                                            value={this.state.client_name}
-                                            placeholder="Client Name"
-                                            name="client_name"
-                                            className={this.state.errorClientName ? 'is-invalid' : '' }
-                                        />
-                                        { this.state.errorClientName ?
-                                            <span className="d-block invalid-feedback" role="alert">
-                                                <strong>this is required</strong>
-                                            </span>
-                                        : '' }
                                     </Col>
                                 </FormGroup>
 
@@ -1561,8 +1635,8 @@ class Edit extends Component {
                                         <Label>Booking Date</Label>
                                         <Input 
                                             type="date" 
-                                            name="booking_date"
-                                            value={this.state.booking_date}
+                                            name="date"
+                                            value={this.state.date}
                                             onChange={this.change}
                                             className={this.state.errorBookingDate ? 'is-invalid' : '' }
                                         />
@@ -1577,12 +1651,17 @@ class Edit extends Component {
                                 <FormGroup row>
                                     <Col md={6}>
                                         <Label>From Time</Label>
-                                        <Input 
-                                            type="time" 
-                                            name="from_time"
-                                            value={this.state.from_time}
-                                            onChange={this.change}
-                                            className={this.state.errorFromTime ? 'is-invalid' : '' }
+                                        <DatePicker
+                                            selected={ booking_date }
+                                            onChange={this.selectTime}
+                                            className="form-control"
+                                            showTimeSelect
+                                            showTimeSelectOnly
+                                            timeIntervals={15}
+                                            excludeTimes={excludeTimes}
+                                            includeTimes={includeTimes}
+                                            timeCaption="Time"
+                                            dateFormat="h:mm aa" 
                                         />
                                         { this.state.errorFromTime ?
                                             <span className="d-block invalid-feedback" role="alert">

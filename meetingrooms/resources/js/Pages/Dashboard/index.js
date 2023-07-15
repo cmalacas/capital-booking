@@ -23,6 +23,7 @@ import setMinutes from 'date-fns/setMinutes';
 
 import "react-datepicker/dist/react-datepicker.css";
 
+import { Add as AddBooking } from '../Bookings';
 export default class Dashboard extends Component {
 
     constructor(props) {
@@ -54,6 +55,21 @@ export default class Dashboard extends Component {
         this.close = this.close.bind(this);
 
         this.setRoom = this.setRoom.bind(this);
+        this.addBooking = this.addBooking.bind(this);
+
+    }
+
+    addBooking( selected ) {
+
+        const date = new Date(selected.start);
+
+        const month = date.getMonth() + 1;
+
+        const day = date.getDate();
+        
+        const year = date.getFullYear();
+
+        console.log('date', month, day, year);
 
     }
 
@@ -287,7 +303,9 @@ export default class Dashboard extends Component {
 
         const user = this.state.user;
 
-        const eventsList = this.state.bookings.map( b => {
+        const bookings = this.state.bookings.filter(b => b.meetingroom_id == this.state.room_id);
+
+        const eventsList = bookings.map( b => {
 
             const dates = b.date.split('-');
 
@@ -415,6 +433,7 @@ export default class Dashboard extends Component {
                            
 
                             <Calendar
+                                selectable={ true }
                                 localizer={localizer}
                                 events={eventsList}
                                 startAccessor="start"
@@ -422,6 +441,7 @@ export default class Dashboard extends Component {
                                 style={{ height }}
                                 views={{ month: true, week: true }}
                                 onSelectEvent={ this.eventSelect }
+                                onSelectSlot={ this.addBooking }
                                 components={
                                     {
                                         toolbar: this.CustomToolbar,
@@ -459,6 +479,10 @@ export default class Dashboard extends Component {
                     </ModalBody>
 
                 </Modal>
+
+                <AddBooking 
+                    addBooking={ this.state.addBooking }
+                />
 
             </Fragment>
 

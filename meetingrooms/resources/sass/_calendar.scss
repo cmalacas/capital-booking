@@ -511,3 +511,18 @@ body {
   }
 
 }
+
+.no-wrap {
+  white-space: nowrap;
+}
+
+tr {
+
+  &.bg-warning {
+
+    background-color: #f2dede !important;
+    color: #a94442;
+
+  }
+
+}

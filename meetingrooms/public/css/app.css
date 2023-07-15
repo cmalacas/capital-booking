@@ -10286,3 +10286,12 @@ body {
 .react-datepicker__time-list-item--disabled {
   display: none;
 }
+
+.no-wrap {
+  white-space: nowrap;
+}
+
+tr.bg-warning {
+  background-color: #f2dede !important;
+  color: #a94442;
+}
