@@ -527,6 +527,7 @@ export default class Dashboard extends Component {
                 </Modal>
 
                 <AddBooking 
+                    user={ this.state.user }
                     open={ this.state.openAddBooking }
                     close={ this.closeAddBooking }
                     month={ this.state.addBookingMonth }
@@ -534,6 +535,7 @@ export default class Dashboard extends Component {
                     year={ this.state.addBookingYear }
                     clients={ this.state.clients }
                     meetingrooms={ this.state.meetingrooms }
+                    meetingroom={ this.state.meetingroom }
                     save={ this.saveBooking }
                 />
 
