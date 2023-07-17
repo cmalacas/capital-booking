@@ -23,7 +23,7 @@ import setMinutes from 'date-fns/setMinutes';
 
 import "react-datepicker/dist/react-datepicker.css";
 
-import { Add as AddBooking } from '../Bookings';
+import AddBooking from './AddBooking';
 export default class Dashboard extends Component {
 
     constructor(props) {
@@ -41,6 +41,12 @@ export default class Dashboard extends Component {
             room_id: 0,
             event: { client_name: '', meeting_room_name: '', _from_time: '', _to_time: '' },
 
+            openAddBooking: false,
+            addBookingMonth: '',
+            addBookingDay: '',
+            addBookingYear: '',
+            clients: []
+
         }
 
         this.getUser = this.getUser.bind(this);
@@ -56,6 +62,40 @@ export default class Dashboard extends Component {
 
         this.setRoom = this.setRoom.bind(this);
         this.addBooking = this.addBooking.bind(this);
+        this.closeAddBooking = this.closeAddBooking.bind(this);
+
+        this.saveBooking = this.saveBooking.bind(this);
+
+    }
+
+    saveBooking(data) {
+
+        Authservice.post('/bookings/save', data)
+        .then(response => {
+
+            if (data.payment_type === 1) {
+
+                if (response.url) {
+
+                    sagepayWin = window.open(response.url, 'sagepay', 'width=999 height=999 scrolls resizable');
+                
+                    sagepayWin.focus();
+
+                }
+
+            } else if (response.bookings) {
+
+                this.setState({bookings: response.bookings});
+
+            }
+
+        })
+
+    }
+
+    closeAddBooking() {
+
+        this.setState({ openAddBooking: false });
 
     }
 
@@ -69,7 +109,12 @@ export default class Dashboard extends Component {
         
         const year = date.getFullYear();
 
-        console.log('date', month, day, year);
+        this.setState({ 
+            openAddBooking: true,
+            addBookingMonth: month,
+            addBookingDay: day,
+            addBookingYear: year
+        });
 
     }
 
@@ -268,7 +313,8 @@ export default class Dashboard extends Component {
                 this.setState({
                     bookings: response.bookings,
                     meetingroom: response.meetingroom,
-                    meetingrooms: response.meetingrooms
+                    meetingrooms: response.meetingrooms,
+                    clients: response.clients
                 });
 
             }
@@ -481,7 +527,14 @@ export default class Dashboard extends Component {
                 </Modal>
 
                 <AddBooking 
-                    addBooking={ this.state.addBooking }
+                    open={ this.state.openAddBooking }
+                    close={ this.closeAddBooking }
+                    month={ this.state.addBookingMonth }
+                    day={ this.state.addBookingDay }
+                    year={ this.state.addBookingYear }
+                    clients={ this.state.clients }
+                    meetingrooms={ this.state.meetingrooms }
+                    save={ this.saveBooking }
                 />
 
             </Fragment>

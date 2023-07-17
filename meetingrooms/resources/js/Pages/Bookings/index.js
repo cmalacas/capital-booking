@@ -264,9 +264,9 @@ export default class Bookings extends Component {
                             />
 
                             <Card>
-                                <CardHeader>
+                                <div className="card-header">
                                     Bookings
-                                </CardHeader>
+                                </div>
                                 <CardBody>
                                     <BootstrapTable 
                                         keyField='id' 
