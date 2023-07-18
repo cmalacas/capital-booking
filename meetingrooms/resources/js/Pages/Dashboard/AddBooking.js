@@ -28,20 +28,15 @@ export default class AddBooking extends Component {
 
         open: false,
 
-        client_id: user.id,
-        client_name: `${user.firstname} ${user.lastname}`,
+        client_id: 0,
+        client_name: '',
         meeting_room_id: props.meetingroom.id,
         meeting_room_name: '',
-        booking_date: `${_date.getFullYear()}-${_date.getMonth() + 1}-${_date.getDate()}`,
+        booking_date: '',
         from_time : '08:45',
-        to_time: '10:45',
-        duration: 2,
+        to_time: '',
+        duration: 0,
         total_amount: 0,
-        vat_amount: 0,
-        company: '',
-        attendee: 2,
-        vat: 20,
-        amount: 0,
         description: '',
         errorClientName: false,
         errorMeetingRoom: false,
@@ -49,10 +44,8 @@ export default class AddBooking extends Component {
         errorFromTime: false,
         errorDuration: false,
         payment_type: 0,
-        your_company_name: '',
-        your_account_email: '',
-        card_first_name: user.firstname,
-        card_last_name: user.lastname,
+        card_first_name: '',
+        card_last_name: '',
         card_city: '',
         card_postcode: '',
         card_address: '',
@@ -60,18 +53,12 @@ export default class AddBooking extends Component {
         offline_notes: '',
         lookup: false,
         founds: [],
-        valid: false,
-        validated: false,
-        maxCapacity: props.meetingroom.capacity,
         errorCardFirstName: false,
         errorCardLastName: false,
         errorCardCity: false,
         errorCardPostCode: false,
         errorCardAddress: false,
-        errorCardCountry: false,
-        errorCompany: false,
-        errorYourCompanyName: false,
-        errorYourAccountEmail: false,
+        errorCardCountry: false
     }
 
     this.change = this.change.bind(this);
@@ -94,10 +81,14 @@ export default class AddBooking extends Component {
 
     const date = `${this.props.year}-${this.props.month > 9 ? this.props.month : `0${this.props.month}`}-${this.props.day > 9 ? this.props.day : `0${this.props.day}`}`;
 
+    const meetingroom = this.props.meetingroom;
 
-    if (this.props.open && this.state.open === false) {
+    const user = this.props.user;
 
-        this.setState({booking_date: date}, () => {
+
+    if (user.type === 1 && this.props.open && this.state.open === false) {
+
+        this.setState({booking_date: date, meeting_room_id: meetingroom.id}, () => {
 
             this.open();
         });
@@ -598,22 +589,7 @@ export default class AddBooking extends Component {
       <Modal isOpen={this.state.open} toggle={this.close} className="mw-100 w-75">
         <ModalBody>
 
-            <Row>
-                            <Col md={6}>
-
-                                <h2>Book A Meeting</h2>
-
-                                <Row>
-                                    <Col><h4>Details</h4></Col>
-                                    <Col className="text-right">
-                                        <span className="info">info</span>
-                                    </Col>
-                                </Row>
-
-                            </Col>
-
-                        </Row>
-
+           
             <Row>
                 <Col md={6}>
                     <FormGroup row>
