@@ -11,6 +11,7 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { faPlus, faSave, faTrash, faEdit, faCheckCircle } from '@fortawesome/free-solid-svg-icons'
+import Footer from '../../components/layouts/footer';
 
 export default class MeetingRooms extends Component {
 
@@ -219,6 +220,8 @@ export default class MeetingRooms extends Component {
                                     />
                                 </CardBody>
                             </Card>
+
+                            <Footer />
                         
                         </div>
                     </div>

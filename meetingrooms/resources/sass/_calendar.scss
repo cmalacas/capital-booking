@@ -305,6 +305,18 @@ body {
 
 }
 
+.add-client-btn {
+  &.btn {
+    width: auto;
+    height: auto;
+    line-height: 2;
+    border-radius: 10px;
+    font-size: 14px;
+    position: absolute;
+    bottom: 0;
+  }
+}
+
 .btn {
 
   font-size: 18px;
@@ -320,7 +332,7 @@ body {
     border-color: transparent;
     line-height: 1.5;
     font-size: 18px;
-  }
+  }  
 
   &.back,
   &.next {

@@ -1,6 +1,7 @@
 import React, {Component, Fragment} from 'react';
 
 import Navigation from '../../components/layouts/navigation';
+import Footer from '../../components/layouts/footer';
 
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
@@ -22,6 +23,8 @@ import setHours from 'date-fns/setHours';
 import setMinutes from 'date-fns/setMinutes';
 
 import "react-datepicker/dist/react-datepicker.css";
+
+import Swal from 'sweetalert2'
 
 import AddBooking from './AddBooking';
 export default class Dashboard extends Component {
@@ -101,20 +104,35 @@ export default class Dashboard extends Component {
 
     addBooking( selected ) {
 
+        const now = new Date();
+
         const date = new Date(selected.start);
 
-        const month = date.getMonth() + 1;
+        const _day = date.getDay();
 
-        const day = date.getDate();
-        
-        const year = date.getFullYear();
+        if ((_day > 0 && _day < 6) && (date >= now ) ) {
 
-        this.setState({ 
-            openAddBooking: true,
-            addBookingMonth: month,
-            addBookingDay: day,
-            addBookingYear: year
-        });
+            const month = date.getMonth() + 1;
+
+            const day = date.getDate();
+            
+            const year = date.getFullYear();
+
+            this.setState({ 
+                openAddBooking: true,
+                addBookingMonth: month,
+                addBookingDay: day,
+                addBookingYear: year
+            });
+
+        } else {
+
+            Swal.fire({
+                icon: 'error',
+                html: 'Selected day is not allowed for booking, please select another date'
+            })
+
+        }
 
     }
 
@@ -423,7 +441,7 @@ export default class Dashboard extends Component {
 
           const room = this.state.meetingroom;
 
-          
+        const today = new Date(); 
 
         return (
 
@@ -495,7 +513,21 @@ export default class Dashboard extends Component {
                                     }
                                 }
                                 eventPropGetter={(this.eventStyleGetter)}
+                                min={ new Date(
+                                        today.getFullYear(),
+                                        today.getMonth(),
+                                        today.getDate(),
+                                        8
+                                    )}
+                                max={ new Date(
+                                        today.getFullYear(),
+                                        today.getMonth(),
+                                        today.getDate(),
+                                        17
+                                    )}
                             />
+
+                            <Footer />
 
                         </div>
                     </div>
@@ -1268,6 +1300,18 @@ class Add extends Component {
 
         const maxCapacity = this.props.meetingroom.capacity;
 
+        let to_time = this.state.to_time.split(':');
+
+        let ampm = 'AM'
+
+        if (to_time[0] && parseInt(to_time[0]) >= 12) {
+
+            to_time[0] = parseInt(to_time[0]) - 12;
+
+            ampm = 'PM'
+
+        }
+
         return (
 
             <Fragment>
@@ -1377,7 +1421,7 @@ class Add extends Component {
                                 <FormGroup row>
                                     
 
-                                    <Col md={8}>
+                                    <Col md={4}>
                                         <Label>Duration</Label>
                                         <Input 
                                             type="select" 
@@ -1399,7 +1443,13 @@ class Add extends Component {
                                         : '' }
                                     </Col>
 
-                                    <Col>
+                                    <Col md={4}>
+                                        <Label>To Time:</Label>
+                                        <Input type="text" value={`${parseInt(to_time[0]) > 9 ? to_time[0] : '0' + to_time[0]}:${to_time[1]} ${ampm}`} readonly />
+                                            
+                                    </Col>
+
+                                    <Col md={4}>
                                         <Label>Attendee</Label>
                                         <Input 
                                             type="number" 

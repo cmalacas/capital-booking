@@ -34,4 +34,30 @@ class UserController extends Controller
 
 
     }
+
+    public function addClient(Request $request) {
+
+        $firstname = $request->get('firstname');
+        $lastname = $request->get('lastname');
+
+        $email = sprintf("%s-%s@email.com", strtolower($firstname), strtolower($lastname));
+
+        $user = new User;
+
+        $user->firstname = $firstname;
+        $user->lastname = $lastname;
+        $user->type = 0;
+        $user->email = $email;
+        $user->password = '';
+        
+        $user->save();
+
+        $data['success'] = 1;
+        $data['client_id'] = $user->id;
+        $data['clients'] = User::where('type', '=', 0)->get();
+
+        return response()->json($data, 200, [], JSON_NUMERIC_CHECK);
+
+
+    }
 }

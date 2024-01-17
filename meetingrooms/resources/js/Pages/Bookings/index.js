@@ -1,10 +1,10 @@
 import React, {Component, Fragment} from 'react';
 
 import Navigation2 from '../../components/layouts/navigation2';
-
+import Footer from '../../components/layouts/footer';
 import Authservice from '../../components/Authservice';
 
-import {Card, CardHeader, CardBody, ModalHeader, ModalBody, ModalFooter, Modal, Button, Label, Input, FormGroup, Row, Col} from 'reactstrap';
+import {Card, CardHeader, CardBody, ModalHeader, ModalBody, ModalFooter, Modal, Button, Label, Input, FormGroup, Row, Col, ButtonGroup} from 'reactstrap';
 
 import BootstrapTable from 'react-bootstrap-table-next';
 
@@ -21,6 +21,9 @@ import setMinutes from 'date-fns/setMinutes';
 import "react-datepicker/dist/react-datepicker.css";
 
 import Select from 'react-select';
+import AsyncSelect from 'react-select/async';
+
+import AddClient from './AddClient';
 
 export default class Bookings extends Component {
 
@@ -34,7 +37,7 @@ export default class Bookings extends Component {
             bookings: [],
             meetingrooms: [],
             clients: [],
-
+            show: 'active',
         }
 
         this.getUser = this.getUser.bind(this);
@@ -43,7 +46,24 @@ export default class Bookings extends Component {
         this.update = this.update.bind(this);
         this.updateStatus = this.updateStatus.bind(this);
         this.delete = this.delete.bind(this);
+
+        this.addClient = this.addClient.bind(this);
        
+    }
+
+    addClient( data ) {
+
+        Authservice.post('/clients/add-client', data)
+        .then(response => {
+
+            if (response.clients) {
+
+                this.setState({ clients: response.clients });
+
+            }
+
+        })
+
     }
 
     delete(id) {
@@ -206,7 +226,9 @@ export default class Bookings extends Component {
                     }
                 ];
 
-        const data = this.state.bookings.map( (b, index) => {
+        const bookings = this.state.bookings.filter( b => this.state.show === 'show-all' || b.expired_status_text == 'Not Expired');
+
+        const data = bookings.map( (b, index) => {
 
             b.index = index + 1;
 
@@ -222,6 +244,7 @@ export default class Bookings extends Component {
                                 save={this.update} 
                                 clients={ this.state.clients }
                                 booking={ b }
+                                addclient={ this.addClient }
                             />
                             <Button 
                                 color="danger"
@@ -261,11 +284,21 @@ export default class Bookings extends Component {
                                 save={this.save} 
                                 meetingrooms={this.state.meetingrooms}
                                 clients={ this.state.clients }
+                                addclient={ this.addClient }
                             />
 
                             <Card>
-                                <div className="card-header">
+                                <div className="card-header d-flex justify-content-between">
                                     Bookings
+
+                                    <ButtonGroup>
+                                        <Button onClick={() => this.setState({ show: 'active' })} color={`${this.state.show === 'active' ? 'primary' : 'dark'}`}>
+                                            Future Booking
+                                        </Button>
+                                        <Button onClick={() => this.setState({ show: 'show-all'})} color={`${this.state.show === 'show-all' ? 'primary' : 'dark'}`}>
+                                            Booking History
+                                        </Button>
+                                    </ButtonGroup>
                                 </div>
                                 <CardBody>
                                     <BootstrapTable 
@@ -278,6 +311,8 @@ export default class Bookings extends Component {
                                     />
                                 </CardBody>
                             </Card>
+
+                            <Footer />
                         
                         </div>
                     </div>
@@ -857,7 +892,7 @@ export class Add extends Component {
                     lastname: c.lastname
                    }
 
-        })
+        });
 
         return (
 
@@ -902,15 +937,21 @@ export class Add extends Component {
                                         : '' }
                                         </Col> */}
 
-                                        <Col>
+                                        <Col md={9}>
 
                                             <Label>Client Name</Label>
-                                            <Select 
+                                            <AsyncSelect 
                                                 isClearable={ true }
                                                 isSearchable={ true }
                                                 onChange={ this.selectClient }
                                                 placeholder=" - select client -"
-                                                options={ clients }
+                                                loadOptions={ clients }
+                                                defaultOptions={ clients }
+                                            />
+                                        </Col>
+                                        <Col md={3}>
+                                            <AddClient 
+                                                save={ this.props.addclient }
                                             />
                                         </Col>
                                 </FormGroup>
@@ -1580,7 +1621,7 @@ class Edit extends Component {
 
             return { value: c.id, label: `${c.firstname} ${c.lastname}`, firstname: c.firstname, lastname: c.lastname }
 
-        })
+        });
 
         return (
 
@@ -1597,10 +1638,21 @@ class Edit extends Component {
                             <Col md={6}>
                                 <FormGroup row>                                    
 
-                                    <Col>
-                                        <Select 
+                                    <Col md={9}>
+                                        <AsyncSelect 
+                                            default={ client }
                                             defaultValue={ client }
-                                            options={ clients }
+                                            isClearable={ true }
+                                            isSearchable={ true }
+                                            onChange={ this.selectClient }
+                                            placeholder=" - select client -"
+                                            loadOptions={ clients }
+                                            defaultOptions={ clients }
+                                        />
+                                    </Col>
+                                    <Col md={3}>
+                                        <AddClient 
+                                            save={ this.props.addclient }
                                         />
                                     </Col>
                                 </FormGroup>
